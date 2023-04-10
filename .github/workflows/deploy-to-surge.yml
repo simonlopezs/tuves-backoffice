@@ -20,7 +20,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: react-github-actions-build
-          path: ./
+          path: ./dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -30,12 +30,12 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: react-github-actions-build
-          path: ./
+          path: ./dist
 
       - name: Deploy to surge.sh
         uses: dswistowski/surge-sh-action@v1
         with:
           domain: 'tuves-backoffice.surge.sh'
           project: './dist'
-          login: ${{ secrets.SIRGE_EMAIL }}
+          login: ${{ secrets.SURGE_EMAIL }}
           token: ${{ secrets.SURGE_TOKEN }}
