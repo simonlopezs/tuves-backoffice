@@ -8,6 +8,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import UploadIcon from "@mui/icons-material/Upload";
 import PeopleIcon from "@mui/icons-material/People";
 import RouterIcon from "@mui/icons-material/Router";
+import { Login } from "./login/Login";
 
 export const ROUTES = [
     {
@@ -38,7 +39,11 @@ export const ROUTES = [
 
 export const router = createBrowserRouter([
     {
-        path: "/",
+        path: "login",
+        element: <Login />
+    },
+    {
+        path: "main",
         element: <App />,
         children: [
             ...ROUTES.map(({ path, element }) => ({ path, element })),
@@ -51,6 +56,6 @@ export const router = createBrowserRouter([
     },
     {
         path: "*",
-        element: <Navigate to='/' />
+        element: <Navigate to='main' />
     }
 ]);

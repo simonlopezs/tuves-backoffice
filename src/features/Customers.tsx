@@ -14,24 +14,23 @@ import {
   Stack,
 } from "@mui/material";
 import { Add, Close, Done, Pending, Search } from "@mui/icons-material";
-import customers from "../api/MOCK_CUSTOMERS.json";
 import { useState } from "react";
+import { dbConnector } from "../api/db-connector";
+import { useQuery } from "react-query";
+import { Customer } from "../models";
 
-const mockCustomers = customers.sort((a, b) =>
-  b.createdAt < a.createdAt ? 1 : -1
-);
-
-interface Customer {
-  id: string;
-  name: string;
-  createdAt: string;
-  state: number;
-}
+const getCustomers = async () => dbConnector.get<Customer>('customers')
 
 export const Customers = () => {
+
+  const { data: customers, isLoading, error } = useQuery('customers', getCustomers)
   const [current, setCurrent] = useState<Customer | null>(null);
   const [term, setTerm] = useState("");
-  const filteredCustomers = mockCustomers.filter((customer) =>
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {JSON.stringify(error)}</div>
+
+  const filteredCustomers = customers!.filter((customer: Customer) =>
     term ? customer.name.toLowerCase().includes(term.toLowerCase()) : true
   );
 

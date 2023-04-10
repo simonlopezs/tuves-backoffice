@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import { Navigation } from "./Navigation";
-import { Outlet } from "react-router-dom";
+import { PropsWithChildren } from "react";
 
-export const Layout = () => {
+export const Layout = ({ children }: PropsWithChildren) => {
   return (
     <Box
       sx={{
@@ -19,9 +19,8 @@ export const Layout = () => {
           overflow: "scroll",
         }}
       >
-        <Outlet />
+        {children}
       </Box>
-
       <Navigation />
     </Box>
   );

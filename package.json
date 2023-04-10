@@ -16,8 +16,10 @@
     "@mui/material": "^5.11.15",
     "@mui/styled-engine-sc": "^5.11.11",
     "@mui/system": "^5.11.15",
+    "firebase": "^9.19.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.10.0",
     "styled-components": "^5.3.9",
     "xlsx": "^0.18.5"
