@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 templates
+./deploy.sh
 
 # Editor directories and files
 .vscode/*
