@@ -1,10 +1,22 @@
-import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Layout } from "./layout/Layout";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { SessionContext } from "./App";
+import { useContext, useEffect } from "react";
 
 
-export const Main = () => (
-    <Layout>
-        <Outlet />
-    </Layout>
-)
+export const Main = () => {
+    const { currentUser } = useContext(SessionContext)
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (currentUser === null) {
+            navigate('/login')
+        }
+    }, [currentUser])
+
+    return (
+        <Layout>
+            <Outlet />
+        </Layout>
+    )
+}

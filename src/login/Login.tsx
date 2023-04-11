@@ -1,24 +1,46 @@
 import { VisibilityOff, Visibility, Key, PersonOutline } from '@mui/icons-material'
-import { Button, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Stack } from '@mui/material'
-import { useContext, useState } from 'react'
-import { SessionHandler } from '../api/session-handler'
+import { FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Stack } from '@mui/material'
+import { useContext, useEffect, useState } from 'react'
 import { SessionContext } from '../App'
+import { LoadingButton } from '@mui/lab'
+import { useNavigate } from 'react-router-dom'
 
 export const Login = () => {
-  const { login } = useContext(SessionContext)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('simo@gmail.com')
+  const [password, setPassword] = useState('000000')
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { login, currentUser } = useContext(SessionContext)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/')
+    }
+  }, [currentUser])
+
   const handleClickShowPassword = () => setShowPassword(!showPassword)
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
   };
+  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter') {
+      handleLogin()
+    }
+  }
+
+  const handleLogin = () => {
+    const credentials = {
+      email, password
+    }
+    setLoading(true)
+    login(credentials).then(() => setLoading(false))
+  }
 
   return (
-    <Stack spacing={3} sx={{ width: '100vw', boxSizing: 'border-box', p: '.5rem' }}>
+    <Stack justifyContent='center' onKeyUp={handleKeyUp} spacing={3} sx={{ width: '100vw', height: '100vh', boxSizing: 'border-box', p: '.5rem' }}>
 
       <h2 style={{ textAlign: 'center' }}>Tuves Backoffice</h2>
-
 
       <FormControl sx={{ width: '100%' }} variant="outlined">
         <InputLabel htmlFor="outlined-adornment-password">Usuario</InputLabel>
@@ -60,7 +82,9 @@ export const Login = () => {
         />
       </FormControl>
 
-      <Button onClick={login} disabled={!(email && password)} variant='contained'>Iniciar sesión</Button>
+      <LoadingButton size='large' onClick={handleLogin} disabled={!(email && password)} variant='contained' loading={loading}>
+        Iniciar sesión
+      </LoadingButton>
 
     </Stack>
   )

@@ -17,7 +17,6 @@ class XlsxImporter {
           // cellDates: true,
           dateNF: 'yyyy-mm-dd'
         });
-        console.log(customers)
         resolve(customers);
       };
       reader.onerror = (error) => {

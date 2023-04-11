@@ -1,13 +1,21 @@
 import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 export const Navigation = () => {
   const [path, setPath] = useState('customers');
   const navigate = useNavigate();
+  const location = useLocation()
+
+  useEffect(() => {
+    const realPath = location.pathname.split('/').pop()!
+    if (realPath !== path) {
+      setPath(realPath)
+    }
+  }, [location])
 
   const changeRoute = (ev: any, path: string) => {
     setPath(path)
@@ -21,6 +29,10 @@ export const Navigation = () => {
       onChange={changeRoute}
       sx={{
         borderTop: "1px solid #e0e0e0",
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
       }}
     >
       {ROUTES.map(({ text, icon, path }) => (

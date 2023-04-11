@@ -2,6 +2,9 @@ import { Close, Done, Pending, Person } from "@mui/icons-material";
 import { Box, Button, ButtonProps, CircularProgress, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack } from "@mui/material";
 import { useState } from "react";
 import { xlsxService } from "../services/XlsxImporter";
+import { dbConnector } from "../api/db-connector";
+import { useMutation, useQueryClient } from "react-query";
+import { LoadingButton } from "@mui/lab";
 
 type UploadType = 'technical' | 'customers' | 'late' | 'unstable' | 'decos';
 
@@ -40,13 +43,31 @@ const uploadOptions: Record<UploadType, UploadOptionData> = {
 }
 
 export const Upload = () => {
-
   const [current, setCurrent] = useState<UploadOptionData | null>(null);
   const [data, setData] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMutation, setLoadingMutation] = useState(false);
+  const queryClient = useQueryClient()
+  const mutation = useMutation((data: any[]) => dbConnector.saveBatch('customers', data, 'RUT'), {
+    onMutate: () => {
+      setLoadingMutation(true)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries('customers')
+      setCurrent(null)
+    },
+    onError: (err) => {
+      console.log('error', err)
+    },
+    onSettled: () => {
+      setLoadingMutation(false)
+      console.log('settled')
+    }
+  })
 
   const saveData = () => {
-    console.log('saving data:', data)
+    if (!data) return;
+    mutation.mutate(data.slice(0, 10))
   }
 
   const onFileChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +128,11 @@ export const Upload = () => {
             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             onChange={onFileChange} type="file" />
 
-          <Button disabled={!data} onClick={saveData} variant='contained'>Cargar</Button>
+
+          <LoadingButton disabled={!data?.length} onClick={saveData} variant='contained' loading={loadingMutation}>
+            Cargar
+          </LoadingButton>
+
 
           {loading && (
             <Box

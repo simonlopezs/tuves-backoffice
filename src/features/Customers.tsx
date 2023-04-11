@@ -13,33 +13,33 @@ import {
   OutlinedInput,
   Stack,
 } from "@mui/material";
-import { Add, Close, Done, Pending, Search } from "@mui/icons-material";
+import { Add, CheckCircle, Close, Done, ErrorOutline, Pending, Search } from "@mui/icons-material";
 import { useState } from "react";
 import { dbConnector } from "../api/db-connector";
 import { useQuery } from "react-query";
 import { Customer } from "../models";
+import { OverallSpinner } from "../components/OverallSpinner";
 
 const getCustomers = async () => dbConnector.get<Customer>('customers')
 
 export const Customers = () => {
 
-  const { data: customers, isLoading, error } = useQuery('customers', getCustomers)
+  const { data: customers, isLoading } = useQuery('customers', getCustomers)
   const [current, setCurrent] = useState<Customer | null>(null);
   const [term, setTerm] = useState("");
+  console.log(customers)
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {JSON.stringify(error)}</div>
+  // if (isLoading) return <div>Loading...</div>
+  // if (error) return <div>Error: {JSON.stringify(error)}</div>
 
-  const filteredCustomers = customers!.filter((customer: Customer) =>
-    term ? customer.name.toLowerCase().includes(term.toLowerCase()) : true
-  );
+  const filteredCustomers = customers?.filter((customer: Customer) =>
+    term ? JSON.stringify(customer).toLowerCase().includes(term.toLowerCase()) : true
+  ) || []
 
   const viewCustomer = (customer: Customer) => setCurrent(customer);
 
   return (
-    <Box
-      sx={{ width: "100%", bgcolor: "background.paper", position: "relative" }}
-    >
+    <Box>
       <FormControl
         sx={{ p: 1, width: "100%", boxSizing: "border-box" }}
         variant="outlined"
@@ -58,7 +58,11 @@ export const Customers = () => {
         />
       </FormControl>
 
-      <nav aria-label="main mailbox folders">
+      <nav style={{
+        height: 'calc(100vh - 172px)',
+        overflowY: 'auto'
+      }}>
+        {isLoading && <OverallSpinner />}
         <List>
           {filteredCustomers.map((customer) => (
             <ListItem
@@ -68,11 +72,11 @@ export const Customers = () => {
             >
               <ListItemButton>
                 <ListItemIcon>
-                  {customer.state === 0 ? <Pending /> : <Done />}
+                  {customer['DIAS_SIN_RECARGAR'] > 0 ? <ErrorOutline color='error' /> : <Done color='primary' />}
                 </ListItemIcon>
                 <ListItemText
-                  primary={customer.name}
-                  secondary={customer.createdAt}
+                  primary={customer['NOMBRE']}
+                  secondary={customer['COMUNA']}
                 />
               </ListItemButton>
             </ListItem>
@@ -104,10 +108,10 @@ export const Customers = () => {
 
 
         {current && (
-          <Stack p="0.5rem" direction="column">
+          <Stack p="0.5rem" sx={{ overflow: 'hidden' }} direction="column">
 
             <Stack direction='row' alignItems='flex-start' justifyContent='space-between'>
-              <h2>{current.name}</h2>
+              <h2>{current['NOMBRE']}</h2>
               <IconButton
                 onClick={() => setCurrent(null)}
               >
@@ -115,10 +119,10 @@ export const Customers = () => {
               </IconButton>
             </Stack>
 
-            <h2>{current.createdAt}</h2>
+            <pre >{JSON.stringify(current).replaceAll(',', '\n').slice(1, -1)}</pre>
           </Stack>
         )}
       </Drawer>
-    </Box>
+    </Box >
   );
 };

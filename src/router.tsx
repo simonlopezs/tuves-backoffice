@@ -9,6 +9,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 import PeopleIcon from "@mui/icons-material/People";
 import RouterIcon from "@mui/icons-material/Router";
 import { Login } from "./login/Login";
+import { Main } from "./Main";
 
 export const ROUTES = [
     {
@@ -39,23 +40,34 @@ export const ROUTES = [
 
 export const router = createBrowserRouter([
     {
-        path: "login",
-        element: <Login />
-    },
-    {
-        path: "main",
+        path: "/",
         element: <App />,
         children: [
-            ...ROUTES.map(({ path, element }) => ({ path, element })),
             {
-                path: "*",
-                element: <Navigate to='customers' />
-            }
-        ],
-        errorElement: <h2 style={{ textAlign: "center" }}> Hubo un error</h2>,
+                path: "/",
+                element: <Navigate to='main' />
+            },
+            {
+                path: "login",
+                element: <Login />
+            },
+            {
+                path: "main",
+                element: <Main />,
+                children: [
+                    {
+                        path: "",
+                        element: <Navigate to='customers' />
+                    },
+                    ...ROUTES.map(({ path, element }) => ({ path, element }))
+                ],
+                errorElement: <h2 style={{ textAlign: "center" }}> Hubo un error</h2>,
+            },
+        ]
     },
+
     {
         path: "*",
-        element: <Navigate to='main' />
+        element: <Navigate to='/' />
     }
 ]);

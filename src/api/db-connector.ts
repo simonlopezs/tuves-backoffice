@@ -1,4 +1,4 @@
-import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore } from "firebase/firestore";
+import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, WithFieldValue } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { User } from "../models";
 import { FirebaseApp } from "firebase/app";
@@ -38,15 +38,17 @@ export class DbConnector {
         return getDoc(docRef).then((doc) => doc.data() as T);
     }
 
-    // async create<T extends AppModel>(collection: Collection, data: any) {
-    //     const id = await this.databases.createDocument<T>(
-    //         this.config.databaseId,
-    //         this.config.collectionsIds[collection],
-    //         ID.unique(),
-    //         data
-    //     )
-    //     return id
-    // }
+    async saveBatch(collectionName: string, data: any[], idKey?: string) {
+        // make chunks if data.length > 500
+        const batch = writeBatch(this.db);
+        data.forEach((item) => {
+            const docRef = idKey ? doc(this.db, `${this.basePath}/${collectionName}`, item[idKey])
+                : doc(collection(this.db, `${this.basePath}/${collectionName}`))
+            batch.set(docRef, item);
+        });
+        return batch.commit();
+    }
+
 
     // async update<T extends AppModel>() {
     //     return Promise.resolve()
