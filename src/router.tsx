@@ -1,22 +1,22 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { App } from "./App";
-import { Customers } from "./features/Customers";
-import { Settings } from "./features/Settings";
-import { Upload } from "./features/Upload";
-import { Decos } from "./features/Decos";
+import { Settings } from "./pages/Settings";
+import { Upload } from "./pages/Upload";
+import { Decos } from "./pages/Decos";
 import SettingsIcon from "@mui/icons-material/Settings";
 import UploadIcon from "@mui/icons-material/Upload";
 import PeopleIcon from "@mui/icons-material/People";
 import RouterIcon from "@mui/icons-material/Router";
 import { Login } from "./login/Login";
 import { Main } from "./Main";
+import { CustomersPage } from "./pages/Customers/CustomersPage";
 
 export const ROUTES = [
     {
         text: "Clientes",
         icon: <PeopleIcon />,
         path: "customers",
-        element: <Customers />,
+        element: <CustomersPage />,
     },
     {
         text: "Retiro decos",
