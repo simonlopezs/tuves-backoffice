@@ -11,7 +11,7 @@ export const Navigation = () => {
   const location = useLocation()
 
   useEffect(() => {
-    const realPath = location.pathname.split('/').pop()!
+    const realPath = location.pathname.split('/')[2]
     if (realPath !== path) {
       setPath(realPath)
     }

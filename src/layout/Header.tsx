@@ -1,5 +1,5 @@
 import { AccountCircle, LogoutOutlined } from '@mui/icons-material'
-import { Box, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material'
 import { useContext, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ROUTES } from '../router';
@@ -20,7 +20,7 @@ export const Header = ({ height }: { height: number }) => {
         setAnchorEl(null);
     }
 
-    const path = location.pathname.split('/').pop()
+    const path = location.pathname.split('/')[2]
     const pageName = path ? ROUTES.find(el => el.path === path)?.text : ''
 
     return (

@@ -24,7 +24,7 @@ export class DbConnector {
     }
 
     async get<T>(collectionName: string) {
-        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`), limit(10)))
+        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`), limit(5)))
             .then((querySnapshot) => querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T)))
     }
 
