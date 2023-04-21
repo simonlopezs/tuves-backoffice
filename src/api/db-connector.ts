@@ -1,14 +1,30 @@
-import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, WithFieldValue } from "firebase/firestore";
+import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, QueryDocumentSnapshot, DocumentData, orderBy, startAfter } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { User } from "../models";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
+import { last, merge } from "lodash";
 
 
 export type Collection =
     | 'users'
     | 'customers'
 // | 'decos'
+export interface QueryOptions {
+    orderBy?: string
+    orderDirection?: 'asc' | 'desc'
+    limit?: number
+    startAfter?: QueryDocumentSnapshot<DocumentData>
+}
+
+const defaultQueryOptions: QueryOptions = {
+    orderBy: 'createdAt',
+    orderDirection: 'desc',
+    limit: 10,
+    startAfter: undefined
+}
+
+export type DocumentCursor = QueryDocumentSnapshot<DocumentData> | undefined
 
 export class DbConnector {
 
@@ -23,9 +39,20 @@ export class DbConnector {
         this.basePath = `tenants/${tenantId}`
     }
 
-    async get<T>(collectionName: string) {
-        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`), limit(5)))
-            .then((querySnapshot) => querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T)))
+    async get<T>(collectionName: string, queryOptions?: QueryOptions): Promise<{ data: T[], nextCursor: DocumentCursor }> {
+        const { orderBy: _orderBy, orderDirection, limit: _limit, startAfter: _startAfter }
+            = queryOptions || defaultQueryOptions
+
+        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`),
+            orderBy(_orderBy || 'createdAt', orderDirection || 'desc'),
+            startAfter(_startAfter || null),
+            limit(_limit || 2)
+        ))
+            .then((querySnapshot) => {
+                const nextCursor = last(querySnapshot.docs)
+                const data = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T))
+                return { data, nextCursor }
+            })
     }
 
     async getUser(uid: string) {

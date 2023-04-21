@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { NavTabs } from "../../components/NavTabs";
+import { Box } from "@mui/material";
 
 const tabs = [
   {
