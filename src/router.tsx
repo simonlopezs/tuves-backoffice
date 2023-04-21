@@ -3,7 +3,7 @@ import { App } from "./App";
 import { Login } from "./login/Login";
 import { Main } from "./Main";
 import { Settings } from "./pages/Settings";
-import { Upload } from "./pages/Upload";
+import { UploadFile } from "./pages/UploadFile";
 import { Decos } from "./pages/decos/DecosPage";
 import SettingsIcon from "@mui/icons-material/Settings";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -83,7 +83,7 @@ export const ROUTES: AppRoute[] = [
         text: "Cargar datos",
         icon: <UploadIcon />,
         path: "upload",
-        element: <Upload />,
+        element: <UploadFile />,
     },
     {
         text: "Ajustes",

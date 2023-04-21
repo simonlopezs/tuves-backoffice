@@ -28,11 +28,8 @@ export const Navigation = () => {
       value={path}
       onChange={changeRoute}
       sx={{
+        boxSizing: "border-box",
         borderTop: "1px solid #e0e0e0",
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
       }}
     >
       {ROUTES.map(({ text, icon, path }) => (

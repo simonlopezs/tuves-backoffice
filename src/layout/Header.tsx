@@ -31,10 +31,6 @@ export const Header = ({ height }: { height: number }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
             p: '0.5rem',
             boxSizing: 'border-box',
         }}>

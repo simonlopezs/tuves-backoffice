@@ -1,8 +1,17 @@
 import { read, utils } from 'xlsx';
 
-class XlsxImporter {
+type FileType = 'Cartera de clientes' | 'Seguimiento de clientes' | 'Clientes dados de baja' | 'Retiro de decos'
 
-  importCustomers(file: File): Promise<any[]> {
+export interface UploadResult {
+  success: boolean,
+  errors?: any[]
+  data: any[],
+  type: FileType
+}
+
+class XLSXService {
+
+  loadFile(file: File): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e: any) => {
@@ -17,7 +26,11 @@ class XlsxImporter {
           // cellDates: true,
           dateNF: 'yyyy-mm-dd'
         });
-        resolve(customers);
+        resolve({
+          success: true,
+          data: customers,
+          type: 'Cartera de clientes'
+        });
       };
       reader.onerror = (error) => {
         reject(error);
@@ -29,4 +42,4 @@ class XlsxImporter {
 }
 
 
-export const xlsxService = new XlsxImporter();
+export const xlsxService = new XLSXService();

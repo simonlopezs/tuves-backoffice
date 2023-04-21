@@ -1,14 +1,16 @@
-import { CircularProgress, Stack } from '@mui/material'
-import React from 'react'
+import { Backdrop, CircularProgress } from '@mui/material'
 
-export const OverallSpinner = () => {
+export interface OveralSpinnerProps {
+    open: boolean
+}
+
+export const OverallSpinner = ({ open }: OveralSpinnerProps) => {
     return (
-        <Stack alignItems='center' justifyContent='center' sx={{
-            width: '100vw',
-            height: '100%',
-            bgColor: 'rgba(0,0,0,.5)',
-        }}>
-            <CircularProgress />
-        </Stack>
+        <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={open}
+        >
+            <CircularProgress color="inherit" />
+        </Backdrop>
     )
 }
