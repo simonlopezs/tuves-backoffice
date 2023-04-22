@@ -1,8 +1,7 @@
-import { Box, CircularProgress, Stack } from "@mui/material";
-import { Ref, useEffect, useRef } from "react";
+import { Button, CircularProgress, Stack } from "@mui/material";
+import { useRef } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
-import InfiniteLoader from "react-window-infinite-loader";
 
 interface InfiniteListProps {
     hasNextPage: boolean,
@@ -10,51 +9,38 @@ interface InfiniteListProps {
     items: any[],
     loadNextPage: () => void,
     children: (props: any) => JSX.Element,
-    sortParams: string[]
+    itemKey?: string
 }
 
-export const InfiniteList = ({ children, sortParams, isNextPageLoading, items, loadNextPage }: InfiniteListProps) => {
+export const InfiniteList = ({ children, itemKey, isNextPageLoading, items, loadNextPage }: InfiniteListProps) => {
 
     const ref = useRef<any>(null)
-    const hasMountedList = useRef(false)
-    useEffect(() => {
-        if (hasMountedList.current && ref.current) {
-            ref.current.resetloadMoreItemsCache();
-        }
-        hasMountedList.current = true;
-    }, [sortParams]);
-
-
-    const itemCount = isNextPageLoading ? items.length + 1 : items.length;
-    const isItemLoaded = (index: number) => index < items.length;
-
+    const getItemKey = (index: number, data: any) => {
+        if (!itemKey) return index;
+        const item = data[index];
+        return item ? item[itemKey] : index;
+    }
 
     return (
         <AutoSizer>
             {({ height, width }) => (
-                <InfiniteLoader
+                <FixedSizeList
+                    itemSize={72.02}
+                    height={(height || 400) - 48}
+                    width={width || 300}
+                    itemCount={items.length + 1}
+                    overscanCount={5}
                     ref={ref}
-                    isItemLoaded={isItemLoaded}
-                    itemCount={itemCount}
-                    loadMoreItems={loadNextPage}
+                    itemData={items}
+                // itemKey={getItemKey}
                 >
-                    {({ onItemsRendered, ref }) => (
-                        <FixedSizeList
-                            itemSize={72.02}
-                            height={height || 400}
-                            width={width || 300}
-                            itemCount={itemCount}
-                            overscanCount={5}
-                            // onItemsRendered={onItemsRendered}
-                            ref={ref}
-                        >
-                            {({ index, style }) => isItemLoaded(index) ? children({ item: items[index], style }) :
-                                <Stack alignItems='center'> <CircularProgress /> </Stack>
-                            }
-                        </FixedSizeList>
-
-                    )}
-                </InfiniteLoader>
+                    {({ index, style, data }) => index < items.length ? children({ item: data[index], style }) :
+                        (<Stack style={style} alignItems='center'>
+                            {isNextPageLoading ? <CircularProgress></CircularProgress> :
+                                <Button onClick={loadNextPage}>Mostrar más</Button>}
+                        </Stack>)
+                    }
+                </FixedSizeList>
             )}
         </AutoSizer>
     );

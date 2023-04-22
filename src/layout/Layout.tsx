@@ -49,9 +49,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
         <Box
           sx={{
             height: `calc(100vh - 56px - ${HEADER_HEIGHT}px)`,
-            overflow: "auto",
-            width: "100%",
-            position: 'relative'
+            overflow: 'hidden'
           }}
         >
           <OverallSpinner open={isLoading} />

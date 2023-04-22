@@ -1,50 +1,38 @@
-import { useInfiniteQuery, useQuery } from "react-query"
+import { useInfiniteQuery, useQueryClient } from "react-query"
 import { QueryOptions, dbConnector } from "../../api/db-connector"
 import { Customer } from "../../models"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { flatten } from "lodash"
-import { Box, Button, CircularProgress, ListItem, ListItemButton, ListItemText } from "@mui/material"
-import { FixedSizeList as List, ListOnScrollProps } from "react-window"
 import { CustomerListItem } from "./components/CustomerListItem"
-import InfiniteLoader from "react-window-infinite-loader"
 import { InfiniteList } from "../../components/InfiniteList"
-
+import { Stack } from "@mui/material"
+import { FilterAlt, Sort } from "@mui/icons-material"
+import { FabMenu } from "../../components/FabMenu"
 
 export const AllCustomers = () => {
 
     const [orderBy, serOrderBy] = useState('NOMBRE')
-    const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc')
+    const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('desc')
 
-    const fetchCustomers = ({ pageParam: startAfter = undefined }) => {
+    const fetchCustomers = ({ pageParam: cursor = undefined }) => {
         const queryOptions: QueryOptions = {
             orderBy,
             orderDirection,
-            startAfter
+            cursor
         }
         return dbConnector.get<Customer>('customers', queryOptions)
     }
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery(['customers'],
-        fetchCustomers,
-        {
-            getNextPageParam: (lastPage) => lastPage.nextCursor,
-            refetchOnWindowFocus: false,
-            staleTime: 1000 * 60 * 60 * 24,
-        })
+
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+        useInfiniteQuery(['customers', orderBy, orderDirection],
+            fetchCustomers,
+            {
+                getNextPageParam: (lastPage) => lastPage?.nextCursor,
+                refetchOnWindowFocus: false,
+                staleTime: 1000 * 60 * 60 * 24,
+            })
 
     const customers = flatten(data?.pages.map(({ data }) => data) || []);
-
-    const handleScroll = ({ scrollDirection, scrollUpdateWasRequested, scrollOffset }: ListOnScrollProps) => {
-        console.log(scrollOffset)
-        console.log('scrollDirection', scrollDirection);
-        if (scrollDirection === 'forward' && !isFetchingNextPage && !scrollUpdateWasRequested && hasNextPage)
-            console.log('fetchNextPage')
-        // fetchNextPage()
-    }
-
-    const loadMoreItems = (data: any) => {
-        console.log('loadMoreItems:', data)
-    }
-
 
     return (
         <>
@@ -53,13 +41,22 @@ export const AllCustomers = () => {
                 isNextPageLoading={isFetchingNextPage}
                 items={customers}
                 loadNextPage={fetchNextPage}
-                sortParams={[orderBy, orderDirection]}
+                itemKey="id"
             >
                 {({ item, style }) => <CustomerListItem style={style} customer={item} />}
             </InfiniteList>
 
-            <Button onClick={() => fetchNextPage()}>Fetch</Button>
-            <Button onClick={() => setOrderDirection(dir => dir === 'asc' ? 'desc' : 'asc')}>Change order</Button>
+            <Stack spacing={2} sx={{ position: 'fixed', bottom: 55 + 16, right: 16 }}>
+                <FabMenu color='primary' icon={<Sort />} options={[
+                    { label: 'Nombre', action: () => serOrderBy('NOMBRE') },
+                    { label: 'Fecha instalación', action: () => serOrderBy('FECHA_INST') },
+                ]} />
+                <FabMenu color='primary' icon={<FilterAlt />} options={[
+                    { label: 'Ascendente', action: () => setOrderDirection('asc') },
+                    { label: 'Descendente', action: () => setOrderDirection('desc') },
+                ]} />
+
+            </Stack>
 
         </>
     )

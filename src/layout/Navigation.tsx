@@ -17,7 +17,7 @@ export const Navigation = () => {
     }
   }, [location])
 
-  const changeRoute = (ev: any, path: string) => {
+  const changeRoute = (_: any, path: string) => {
     setPath(path)
     navigate(path)
   }

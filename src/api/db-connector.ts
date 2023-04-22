@@ -1,9 +1,9 @@
-import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, QueryDocumentSnapshot, DocumentData, orderBy, startAfter } from "firebase/firestore";
+import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, QueryDocumentSnapshot, DocumentData, orderBy, startAfter, endBefore, limitToLast } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { User } from "../models";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { last, merge } from "lodash";
+import { compact, first, last, merge } from "lodash";
 
 
 export type Collection =
@@ -14,14 +14,14 @@ export interface QueryOptions {
     orderBy?: string
     orderDirection?: 'asc' | 'desc'
     limit?: number
-    startAfter?: QueryDocumentSnapshot<DocumentData>
+    cursor?: QueryDocumentSnapshot<DocumentData>
 }
 
 const defaultQueryOptions: QueryOptions = {
     orderBy: 'createdAt',
     orderDirection: 'desc',
     limit: 10,
-    startAfter: undefined
+    cursor: undefined
 }
 
 export type DocumentCursor = QueryDocumentSnapshot<DocumentData> | undefined
@@ -40,17 +40,22 @@ export class DbConnector {
     }
 
     async get<T>(collectionName: string, queryOptions?: QueryOptions): Promise<{ data: T[], nextCursor: DocumentCursor }> {
-        const { orderBy: _orderBy, orderDirection, limit: _limit, startAfter: _startAfter }
+        console.log(queryOptions)
+        const { orderBy: _orderBy, limit: _limit, cursor, orderDirection }
             = queryOptions || defaultQueryOptions
 
-        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`),
+        const queryConstraints = compact([
             orderBy(_orderBy || 'createdAt', orderDirection || 'desc'),
-            startAfter(_startAfter || null),
-            limit(_limit || 2)
+            cursor ? startAfter(cursor) : undefined,
+            limit(_limit || 10),
+        ])
+        return getDocs(query(collection(this.db, `${this.basePath}/${collectionName}`),
+            ...queryConstraints
         ))
             .then((querySnapshot) => {
                 const nextCursor = last(querySnapshot.docs)
                 const data = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T))
+                console.log(data)
                 return { data, nextCursor }
             })
     }
