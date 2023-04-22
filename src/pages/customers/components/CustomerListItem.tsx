@@ -1,8 +1,12 @@
-import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import { ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { Customer } from '../../../models'
 import { Done, ErrorOutline } from '@mui/icons-material'
 import { useLayoutContext } from '../../../layout/LayoutContext'
 import { CustomerDetails } from './CustomerDetails'
+import { startCase } from 'lodash'
+import { formatRut } from '../../../utils/formatRut'
+import { titlecase } from '../../../utils/titlecase'
+import { StateIcon } from './StateIcon'
 
 interface CustomerListItemProps {
   customer: Customer,
@@ -21,14 +25,26 @@ export const CustomerListItem = ({ customer, style }: CustomerListItemProps) => 
       onClick={() => selectCustomer(customer)}
       key={customer.RUT}
       disablePadding
+
+
     >
-      <ListItemButton>
+      <ListItemButton disableRipple>
         <ListItemIcon>
-          {customer['DIAS_SIN_RECARGAR'] > 0 ? <ErrorOutline color='error' /> : <Done color='primary' />}
+          {<StateIcon daysLate={customer['DIAS_SIN_RECARGAR']} />}
         </ListItemIcon>
         <ListItemText
-          primary={customer['NOMBRE']}
-          secondary={customer['COMUNA']}
+          primary={titlecase(customer['NOMBRE'])}
+          secondary={(<>
+            <Typography
+              component="span"
+              variant="body2"
+              color="text.primary"
+            >
+              {formatRut(customer['RUT'])}
+            </Typography>
+            <br /> {titlecase(customer['COMUNA'])} &nbsp;&nbsp;|&nbsp;&nbsp; {customer['FECHA_INST']}
+          </>
+          )}
         />
       </ListItemButton>
     </ListItem>

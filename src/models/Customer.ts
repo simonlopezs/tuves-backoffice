@@ -11,4 +11,5 @@ export interface Customer {
     REGION: string,
     DIRECCION: string,
     'DIAS_SIN_RECARGAR': number
+    'FECHA_INST': number
 }

@@ -13,6 +13,7 @@ export const Drawer = () => {
                     height: "100vh",
                 },
             }}
+            hideBackdrop
             anchor="bottom"
             open={!!drawerContent}
             onClose={closeDrawer}

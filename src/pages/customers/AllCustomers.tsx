@@ -41,7 +41,7 @@ export const AllCustomers = () => {
                 isNextPageLoading={isFetchingNextPage}
                 items={customers}
                 loadNextPage={fetchNextPage}
-                itemKey="id"
+                itemSize={92.03}
             >
                 {({ item, style }) => <CustomerListItem style={style} customer={item} />}
             </InfiniteList>
