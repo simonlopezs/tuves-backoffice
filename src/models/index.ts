@@ -1,3 +1,3 @@
-export * from './Tenant';
-export * from './User';
-export * from './Customer';
+export * from './Tenant.model';
+export * from './User.model';
+export * from './Customer.model';

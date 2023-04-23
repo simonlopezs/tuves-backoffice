@@ -83,15 +83,18 @@ export const UploadFile = () => {
         }
       </Box>
 
-      <Fab onClick={() => fileInput.current?.click()} sx={{ position: 'absolute', bottom: '0', right: '0', margin: '1rem' }} color="primary">
-        <Upload />
-      </Fab>
-      <input
-        ref={fileInput}
-        id="upload-file"
-        hidden
-        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        onChange={onFileChange} type="file" />
+      <Stack sx={{ position: 'fixed', bottom: 55 + 16, right: 16 }}>
+        <Fab size='medium' onClick={() => fileInput.current?.click()} color="primary">
+          <Upload />
+        </Fab>
+        <input
+          ref={fileInput}
+          id="upload-file"
+          hidden
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          onChange={onFileChange} type="file" />
+      </Stack>
+
 
     </Stack>)
 };

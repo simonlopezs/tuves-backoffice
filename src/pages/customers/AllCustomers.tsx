@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "react-query"
 import { QueryOptions, dbConnector } from "../../api/db-connector"
-import { Customer } from "../../models"
+import { ICustomer } from "../../models"
 import { useState } from "react"
 import { flatten } from "lodash"
 import { CustomerListItem } from "./components/CustomerListItem"
@@ -10,9 +10,9 @@ import { SortMenu } from "./components/SortMenu"
 
 export const AllCustomers = () => {
 
-    const [orderBy, setOrderBy] = useState('NOMBRE')
+    const [orderBy, setOrderBy] = useState('FECHA_INST')
     const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('desc')
-    const [filter, setFilter] = useState(null)
+    // const [filter, setFilter] = useState(null)
 
     const fetchCustomers = ({ pageParam: cursor = undefined }) => {
         const queryOptions: QueryOptions = {
@@ -20,7 +20,7 @@ export const AllCustomers = () => {
             orderDirection,
             cursor
         }
-        return dbConnector.get<Customer>('customers', queryOptions)
+        return dbConnector.get<ICustomer>('customers', queryOptions)
     }
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =

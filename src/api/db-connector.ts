@@ -40,7 +40,6 @@ export class DbConnector {
     }
 
     async get<T>(collectionName: string, queryOptions?: QueryOptions): Promise<{ data: T[], nextCursor: DocumentCursor }> {
-        console.log(queryOptions)
         const { orderBy: _orderBy, limit: _limit, cursor, orderDirection }
             = queryOptions || defaultQueryOptions
 
@@ -55,7 +54,6 @@ export class DbConnector {
             .then((querySnapshot) => {
                 const nextCursor = last(querySnapshot.docs)
                 const data = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T))
-                console.log(data)
                 return { data, nextCursor }
             })
     }

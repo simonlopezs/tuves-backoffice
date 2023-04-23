@@ -1,9 +1,9 @@
 import { Close } from '@mui/icons-material'
 import { IconButton, Stack } from '@mui/material'
-import { Customer } from '../../../models'
+import { ICustomer } from '../../../models'
 
 interface CustomerDetailProps {
-  customer: Customer
+  customer: ICustomer
 }
 
 export const CustomerDetails = ({ customer }: CustomerDetailProps) => {

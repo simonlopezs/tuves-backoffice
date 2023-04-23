@@ -1,5 +1,5 @@
 import { read, utils } from 'xlsx';
-import { CUSTOMER_KEYS, Customer } from '../models/Customer';
+import { CUSTOMER_KEYS, ICustomer } from '../models/Customer.model';
 import { set, keys } from 'lodash';
 import { addDays, toDate, format } from 'date-fns';
 
@@ -75,7 +75,7 @@ class XLSXService {
 
   private formatCustomer(customer: any): any {
     const fileDate = this.dateFromString(customer['FECHA'])
-    const obj: Partial<Customer> = {
+    const obj: Partial<ICustomer> = {
       _fileDate: fileDate
     }
     CUSTOMER_KEYS.forEach(([key, rawKey]) => {
@@ -100,7 +100,7 @@ class XLSXService {
       addDays(fechaBaja, 60)
     }
     set(obj, 'fechas.baja', fechaBaja)
-    return obj as Customer
+    return obj as ICustomer
   }
 
   private formatDeco(data: any[]) {

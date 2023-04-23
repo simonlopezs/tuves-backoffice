@@ -1,5 +1,5 @@
 import { ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
-import { Customer } from '../../../models'
+import { ICustomer } from '../../../models'
 import { Done, ErrorOutline } from '@mui/icons-material'
 import { useLayoutContext } from '../../../layout/LayoutContext'
 import { CustomerDetails } from './CustomerDetails'
@@ -9,14 +9,14 @@ import { titlecase } from '../../../utils/titlecase'
 import { StateIcon } from './StateIcon'
 
 interface CustomerListItemProps {
-  customer: Customer,
+  customer: ICustomer,
   style: any
 }
 
 
 export const CustomerListItem = ({ customer, style }: CustomerListItemProps) => {
   const { setDrawerContent } = useLayoutContext()
-  const selectCustomer = (customer: Customer) =>
+  const selectCustomer = (customer: ICustomer) =>
     setDrawerContent(<CustomerDetails customer={customer} />)
 
   return (

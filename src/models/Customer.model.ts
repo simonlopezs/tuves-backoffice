@@ -1,4 +1,4 @@
-export interface Customer {
+export interface ICustomer {
 
     nombre: string
     rut: string
