@@ -1,4 +1,4 @@
-export interface Customer {
+export interface Deco {
 
     nombre: string
     rut: string
@@ -35,7 +35,7 @@ export interface Customer {
 
 }
 
-export const CUSTOMER_KEYS = [
+export const DECO_KEYS = [
     ['nombre', 'NOMBRE'],
     ['rut', 'RUT'],
     ['email', 'EMAIL'],

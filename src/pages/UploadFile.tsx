@@ -1,10 +1,16 @@
 import { Box, Button, Divider, Fab, Stack, } from "@mui/material";
 import { useRef, useState } from "react";
-import { UploadResult, xlsxService } from "../services/xlsx";
+import { FileType, UploadResult, xlsxService } from "../services/xlsx";
 import { dbConnector } from "../api/db-connector";
 import { useMutation } from "react-query";
 import { Upload, Close, Save } from '@mui/icons-material';
 import { useLayoutContext } from "../layout/LayoutContext";
+
+const fileTypes: Record<FileType, string> = {
+  customers: 'Cartera de clientes',
+  'all-decos': 'Retiro de decos libres',
+  'own-decos': 'Retiro de decos propios',
+}
 
 export const UploadFile = () => {
   const [result, setResult] = useState<UploadResult | null>(null);
@@ -36,9 +42,11 @@ export const UploadFile = () => {
     if (files) {
       load()
       const file = files[0]
-      const result = await xlsxService.loadFile(file)
-      setResult(result)
-      stopLoad()
+      xlsxService.loadFile(file)
+        .then(result => setResult(result))
+        .catch(err => {
+          console.log(err)
+        }).finally(() => stopLoad())
     }
   }
 
@@ -54,9 +62,12 @@ export const UploadFile = () => {
         {result &&
           <Stack spacing={2}>
             <Box>
-              <h2>{result.type}</h2>
+              <h2>{fileTypes[result.type]}</h2>
               <p>
                 {result.data.length} registros
+              </p>
+              <p>
+                Fecha de los registros: {result.fileDate}
               </p>
 
             </Box>
