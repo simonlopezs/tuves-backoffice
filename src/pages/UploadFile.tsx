@@ -13,8 +13,10 @@ const fileTypes: Record<FileType, string> = {
   "own-decos": "Retiro de decos propios",
 };
 
+type ResultError = "string";
+
 export const UploadFile = () => {
-  const [result, setResult] = useState<UploadResult | null>(null);
+  const [result, setResult] = useState<UploadResult | ResultError | null>(null);
   const { load, stopLoad, showSnackbar } = useLayoutContext();
   const fileInput = useRef<HTMLInputElement>(null);
   const mutation = useMutation(
@@ -43,7 +45,7 @@ export const UploadFile = () => {
   );
 
   const saveData = () => {
-    if (!result?.data) return;
+    if (!result || typeof result === "string") return;
     mutation.mutate(result.data);
   };
 
@@ -55,9 +57,7 @@ export const UploadFile = () => {
       xlsxService
         .loadFile(file)
         .then((result) => setResult(result))
-        .catch((err) => {
-          console.log(err);
-        })
+        .catch((err: any) => setResult(err.message))
         .finally(() => stopLoad());
     }
   };
@@ -68,56 +68,71 @@ export const UploadFile = () => {
   };
 
   return (
-    <Stack
-      sx={{ height: "100%", boxSizing: "border-box" }}
-      direction="column"
-      justifyContent="space-between"
-      p={1}
-    >
-      <Box>
-        {result && (
-          <Stack spacing={2}>
-            <Box>
-              <h2>{fileTypes[result.type]}</h2>
-              <p>{result.data.length} registros</p>
-            </Box>
-
-            <Divider />
-
-            <Stack direction="row" justifyContent="space-between">
-              <Button startIcon={<Close />} onClick={cancel} variant="outlined">
-                Cancelar
+    <Box height="100%" padding={1}>
+      {result ? (
+        <Stack spacing={2}>
+          {typeof result === "string" ? (
+            <>
+              <p style={{ textAlign: "center" }}>{result}</p>
+              <Button onClick={cancel} variant="outlined">
+                Atrás
               </Button>
-              <Button
-                startIcon={<Save />}
-                onClick={saveData}
-                variant="contained"
-                disableElevation
-              >
-                Guardar
-              </Button>
-            </Stack>
-          </Stack>
-        )}
-      </Box>
+            </>
+          ) : (
+            <>
+              <Box>
+                <h2>{fileTypes[result.type]}</h2>
+                <p>{result.data.length} registros</p>
+              </Box>
+              <Divider />
 
-      <Stack sx={{ position: "fixed", bottom: 55 + 16, right: 16 }}>
-        <Fab
-          size="medium"
-          onClick={() => fileInput.current?.click()}
-          color="primary"
+              <Stack direction="row" justifyContent="space-between">
+                <Button
+                  startIcon={<Close />}
+                  onClick={cancel}
+                  variant="outlined"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  startIcon={<Save />}
+                  onClick={saveData}
+                  variant="contained"
+                  disableElevation
+                >
+                  Guardar
+                </Button>
+              </Stack>
+            </>
+          )}
+        </Stack>
+      ) : (
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <Upload />
-        </Fab>
-        <input
-          ref={fileInput}
-          id="upload-file"
-          hidden
-          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          onChange={onFileChange}
-          type="file"
-        />
-      </Stack>
-    </Stack>
+          <Button
+            size="large"
+            variant="outlined"
+            onClick={() => fileInput.current?.click()}
+            color="primary"
+          >
+            Subir archivo <Upload />
+          </Button>
+        </Box>
+      )}
+      <input
+        ref={fileInput}
+        id="upload-file"
+        hidden
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        onChange={onFileChange}
+        type="file"
+      />
+    </Box>
   );
 };

@@ -2,18 +2,18 @@ import { camelCase, chain, isNaN } from "lodash";
 import { read, utils } from "xlsx";
 
 export type FileType = "customers" | "own-decos" | "all-decos";
+const numberKeys = ["pagos", "deuda", "diasSinRecargar"];
 export interface UploadResult {
   data: any[];
   type: FileType;
 }
 class XLSXService {
   loadFile(file: File): Promise<UploadResult> {
-    const type = this.getFileType(file.name);
-
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         try {
+          const type = this.getFileType(file.name);
           const fileData = e.target.result;
           const workbook = read(fileData, {
             type: "binary",
@@ -31,10 +31,18 @@ class XLSXService {
             .map((item: any) =>
               chain(item)
                 .mapKeys((_, k: string) => camelCase(k.toLowerCase()))
-                .mapValues((v) => (isNaN(Number(v)) ? v : Number(v)))
+                .mapValues((v, k) => {
+                  const dateRegex = /\d{4}[-]\d{1,2}[-]\d{1,2}/g;
+                  if (typeof v === "string" && v.match(dateRegex)?.length)
+                    return this.dateFromString(v);
+                  return numberKeys.includes(k)
+                    ? isNaN(Number(v))
+                      ? v
+                      : Number(v)
+                    : v;
+                })
                 .value()
             );
-
           if (!data.length) throw new Error("Archivo sin registros");
           resolve({
             data,
@@ -64,6 +72,13 @@ class XLSXService {
       : null;
     if (!type) throw new Error("Archivo no reconocido");
     return type;
+  }
+
+  private dateFromString(dateString: string) {
+    const [year, month, day] = dateString.split("-").map((v) => Number(v));
+    const date = new Date(year, month - 1, day);
+    date.setHours(12, 0, 0, 0);
+    return date;
   }
 }
 
