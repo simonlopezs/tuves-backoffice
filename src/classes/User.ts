@@ -1,5 +1,3 @@
 export class User {
-    constructor(data: any) {
-
-    }
+  constructor(data: any) {}
 }
