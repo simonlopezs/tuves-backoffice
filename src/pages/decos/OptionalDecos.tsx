@@ -1,6 +1,3 @@
-
 export const OptionalDecos = () => {
-    return (
-        <div>OptionalDecos</div>
-    )
-}
+  return <div>En desarrollo</div>;
+};

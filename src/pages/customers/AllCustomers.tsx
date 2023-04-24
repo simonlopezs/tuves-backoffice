@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "react-query";
-import { QueryOptions, dbConnector } from "../../api/db-connector";
+import { Filter, QueryOptions, dbConnector } from "../../api/db-connector";
 import { ICustomer } from "../../models";
 import { useState } from "react";
 import { flatten } from "lodash";
@@ -8,11 +8,12 @@ import { InfiniteList } from "../../components/InfiniteList";
 import { Stack } from "@mui/material";
 import { SortMenu } from "./components/SortMenu";
 import { Customer } from "../../classes/Customer";
+import { FilterMenu } from "./components/FilterMenu";
 
 export const AllCustomers = () => {
   const [orderBy, setOrderBy] = useState("fechaInst");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
-  // const [filter, setFilter] = useState(null)
+  const [filter, setFilter] = useState<Filter | null>(null);
 
   const fetchCustomers = async ({ pageParam: cursor = undefined }) => {
     const queryOptions: QueryOptions = {
@@ -20,6 +21,7 @@ export const AllCustomers = () => {
       orderDirection,
       cursor,
     };
+    if (filter) queryOptions.filter = filter;
     return dbConnector
       .get<ICustomer>("customers", queryOptions)
       .then(({ data, nextCursor }) => ({
@@ -55,7 +57,7 @@ export const AllCustomers = () => {
         <SortMenu
           {...{ orderBy, setOrderBy, orderDirection, setOrderDirection }}
         />
-        {/* <FilterMenu items={[]} /> */}
+        <FilterMenu {...{ filter, setFilter }} />
       </Stack>
     </>
   );

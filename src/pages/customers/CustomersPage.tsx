@@ -3,16 +3,16 @@ import { NavTabs } from "../../components/NavTabs";
 
 const tabs = [
   {
-    label: "Todos",
-    path: "all",
-  },
-  {
-    label: "Sin pagar",
+    label: "Bajas",
     path: "late",
   },
   {
-    label: "De baja",
-    path: "inactive",
+    label: "Buscar",
+    path: "search",
+  },
+  {
+    label: "Todos",
+    path: "all",
   },
 ];
 

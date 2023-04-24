@@ -10,7 +10,7 @@ const HEADER_HEIGHT = 52;
 
 export type SnackbarContent = {
   message: string;
-  type: "success" | "info" | "warning" | "error";
+  type: "success" | "error";
 };
 
 export const Layout = ({ children }: PropsWithChildren) => {
@@ -24,7 +24,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
   const stopLoad = () => setIsLoading(false);
 
   // snackbar
-  const [snackbar, setSnackbar] = useState<SnackbarContent | null>(null);
+  const [snackbar, setSnackbar] = useState<SnackbarContent | null>();
 
   const handleClose = (_: any, reason?: string) => {
     if (reason === "clickaway") {
@@ -56,10 +56,10 @@ export const Layout = ({ children }: PropsWithChildren) => {
           <OverallSpinner open={isLoading} />
           <Snackbar
             open={!!snackbar}
+            message={snackbar?.message}
             autoHideDuration={6000}
             onClose={handleClose}
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            message={snackbar?.message || ""}
             TransitionComponent={(props) => <Grow {...props} />}
           />
           {children}

@@ -23,11 +23,11 @@ export interface ICustomer extends IBase {
   diasSinRecargar: number;
   tipoRecarga: string;
 
-  fechaIngreso: string;
-  fechaInst: string;
-  fechaIngresoContratoActual: string;
-  fechaCancela: string;
-  finRecarga: string;
+  fechaIngreso: Date | number;
+  fechaInst: Date | number;
+  fechaIngresoContratoActual: Date | number;
+  fechaCancela: Date | number;
+  finRecarga: Date | number;
 
-  _updatedAt: Date;
+  urbanizacion: string;
 }

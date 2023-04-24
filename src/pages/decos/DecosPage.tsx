@@ -1,23 +1,22 @@
-import { Outlet } from "react-router-dom"
-import { NavTabs } from "../../components/NavTabs"
+import { Outlet } from "react-router-dom";
+import { NavTabs } from "../../components/NavTabs";
 
 const tabs = [
-    {
-        label: 'Requeridos',
-        path: 'required'
-    },
-    {
-        label: 'Opcionales',
-        path: 'optional'
-    },
-]
+  {
+    label: "Propios",
+    path: "own",
+  },
+  {
+    label: "Libres",
+    path: "free",
+  },
+];
 
 export const Decos = () => {
-    return (
-        <>
-            <NavTabs tabs={tabs} />
-            <Outlet />
-        </>
-    )
-
-}
+  return (
+    <>
+      <NavTabs tabs={tabs} />
+      <Outlet />
+    </>
+  );
+};

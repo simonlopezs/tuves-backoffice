@@ -4,7 +4,9 @@ export function titlecase(str: string) {
     .trim()
     .split(" ")
     .map((word) => {
-      return word[0].toUpperCase() + word.slice(1).toLowerCase();
+      return word.length
+        ? word[0].toUpperCase() + word.slice(1).toLowerCase()
+        : "";
     })
     .join(" ");
 }

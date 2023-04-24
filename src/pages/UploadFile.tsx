@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Fab, Stack } from "@mui/material";
+import { Box, Button, Divider, Stack } from "@mui/material";
 import { useRef, useState } from "react";
 import { FileType, UploadResult, xlsxService } from "../services/xlsx";
 import { dbConnector } from "../api/db-connector";
@@ -6,6 +6,7 @@ import { useMutation } from "react-query";
 import { Upload, Close, Save } from "@mui/icons-material";
 import { useLayoutContext } from "../layout/LayoutContext";
 import { ICustomer } from "../models";
+import { chain, compact, uniqBy } from "lodash";
 
 const fileTypes: Record<FileType, string> = {
   customers: "Cartera de clientes",
@@ -15,34 +16,42 @@ const fileTypes: Record<FileType, string> = {
 
 type ResultError = "string";
 
+const persistData = (data: ICustomer[]) =>
+  dbConnector.saveBatch("customers", data, "rut").then(() => {
+    const communes = chain(data)
+      .groupBy("comuna")
+      .mapValues((c) => uniqBy(c, "urbanizacion").map((v) => v.urbanizacion))
+      .toPairs()
+      .map(([commune, towns]) => ({ name: commune, towns: compact(towns) }))
+      .value();
+    return dbConnector.save("meta", { data: communes }, "communes");
+  });
+
 export const UploadFile = () => {
   const [result, setResult] = useState<UploadResult | ResultError | null>(null);
   const { load, stopLoad, showSnackbar } = useLayoutContext();
   const fileInput = useRef<HTMLInputElement>(null);
-  const mutation = useMutation(
-    (data: ICustomer[]) => dbConnector.saveBatch("customers", data, "rut"),
-    {
-      onMutate: () => {
-        load();
-      },
-      onSuccess: () => {
-        showSnackbar({
-          message: "Los datos se guardaron correctamente",
-          type: "success",
-        });
-      },
-      onError: (err) => {
-        showSnackbar({
-          message: "Hubo un error al guardar los datos",
-          type: "error",
-        });
-      },
-      onSettled: () => {
-        stopLoad();
-        cancel();
-      },
-    }
-  );
+  const mutation = useMutation((data: ICustomer[]) => persistData(data), {
+    onMutate: () => {
+      load();
+    },
+    onSuccess: () => {
+      showSnackbar({
+        message: "Los datos se guardaron correctamente",
+        type: "success",
+      });
+    },
+    onError: (err) => {
+      showSnackbar({
+        message: "Hubo un error al guardar los datos",
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      stopLoad();
+      cancel();
+    },
+  });
 
   const saveData = () => {
     if (!result || typeof result === "string") return;

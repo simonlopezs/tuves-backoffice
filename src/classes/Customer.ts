@@ -47,6 +47,10 @@ export class Customer {
     return this.data.direccion;
   }
 
+  getTown() {
+    return titlecase(this.data.urbanizacion);
+  }
+
   getCommune() {
     return titlecase(this.data.comuna);
   }
@@ -55,10 +59,9 @@ export class Customer {
     return titlecase(this.data.region);
   }
 
-  getDate(dateName: DateNameKey, asString = true): string | Date {
-    const rawDate = this.data[DateName[dateName]];
-    if (!rawDate || rawDate === "0") return "";
-    const date = this.dateFromString(rawDate);
+  getDate(dateName: DateNameKey, asString = true) {
+    const date = this.data[DateName[dateName]];
+    if (!date) return "";
     return asString ? format(date, "dd-MM-yyyy") : date;
   }
 
@@ -89,13 +92,6 @@ export class Customer {
 
   sendWhatsapp(phone: string) {
     console.log("sending whatsapp to", phone);
-  }
-
-  private dateFromString(dateString: string) {
-    const [year, month, day] = dateString.split("-").map((v) => Number(v));
-    const date = new Date(year, month - 1, day);
-    date.setHours(12, 0, 0, 0);
-    return date;
   }
 
   private cleanPhone(phone: string) {

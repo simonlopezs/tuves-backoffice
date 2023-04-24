@@ -14,12 +14,14 @@ import {
   DocumentData,
   orderBy,
   startAfter,
+  Timestamp,
+  setDoc,
+  addDoc,
 } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { compact, last } from "lodash";
-import { User } from "../classes/User";
+import { compact, last, mapValues } from "lodash";
 import { IUser } from "../models";
 
 export type Collection = "users" | "customers" | "decos";
@@ -29,6 +31,13 @@ export interface QueryOptions {
   orderDirection?: "asc" | "desc";
   limit?: number;
   cursor?: QueryDocumentSnapshot<DocumentData>;
+  filter?: Filter;
+}
+
+export interface Filter {
+  key: string;
+  operator: "==" | "<" | ">" | "<=" | ">=" | "array-contains" | "in";
+  value: any;
 }
 
 const defaultQueryOptions: QueryOptions = {
@@ -61,12 +70,14 @@ export class DbConnector {
       limit: _limit,
       cursor,
       orderDirection,
+      filter,
     } = queryOptions || defaultQueryOptions;
 
     const queryConstraints = compact([
       orderBy(_orderBy || "createdAt", orderDirection || "desc"),
       cursor ? startAfter(cursor) : undefined,
       limit(_limit || 10),
+      filter ? where(filter.key, filter.operator, filter.value) : undefined,
     ]);
     return getDocs(
       query(
@@ -76,10 +87,14 @@ export class DbConnector {
     ).then((querySnapshot) => {
       const nextCursor = last(querySnapshot.docs);
       const data = querySnapshot.docs.map(
-        (doc) => ({ ...doc.data(), _id: doc.id } as T)
+        (doc) => ({ ...this.formatDates(doc.data()), _id: doc.id } as T)
       );
       return { data, nextCursor };
     });
+  }
+
+  private formatDates(obj: Object) {
+    return mapValues(obj, (v) => (v instanceof Timestamp ? v.toDate() : v));
   }
 
   async getUser(uid: string) {
@@ -108,6 +123,16 @@ export class DbConnector {
       batch.set(docRef, item);
     });
     return batch.commit();
+  }
+
+  async save(collectionName: string, data: any, id?: string) {
+    const baseArgs: [Firestore, string] = [
+      this.db,
+      `${this.basePath}/${collectionName}`,
+    ];
+    return id
+      ? setDoc(doc(...baseArgs, id), data)
+      : addDoc(collection(...baseArgs), data);
   }
 
   // async update<T extends AppModel>() {

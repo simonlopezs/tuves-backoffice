@@ -28,21 +28,24 @@ class XLSXService {
               blankrows: false,
               raw: false,
             })
-            .map((item: any) =>
-              chain(item)
+            .map((item: any) => ({
+              ...chain(item)
                 .mapKeys((_, k: string) => camelCase(k.toLowerCase()))
                 .mapValues((v, k) => {
                   const dateRegex = /\d{4}[-]\d{1,2}[-]\d{1,2}/g;
                   if (typeof v === "string" && v.match(dateRegex)?.length)
                     return this.dateFromString(v);
-                  return numberKeys.includes(k)
-                    ? isNaN(Number(v))
-                      ? v
-                      : Number(v)
-                    : v;
+                  if (numberKeys.includes(k)) {
+                    return isNaN(Number(v)) ? v : Number(v);
+                  }
+                  return typeof v === "string" ? v.trim().toLowerCase() : v;
                 })
-                .value()
-            );
+                .value(),
+              urbanizacion:
+                (item["DIRECCION"]?.includes("Urb:")
+                  ? item["DIRECCION"].split("Urb:")[1].trim().toLowerCase()
+                  : item["DIRECCION"].split(",")[0].trim().toLowerCase()) || "",
+            }));
           if (!data.length) throw new Error("Archivo sin registros");
           resolve({
             data,

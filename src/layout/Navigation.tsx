@@ -4,27 +4,25 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../router";
 import { useEffect, useState } from "react";
 
-
 export const Navigation = () => {
-  const [path, setPath] = useState('customers');
+  const [path, setPath] = useState("customers");
   const navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
 
   useEffect(() => {
-    const realPath = location.pathname.split('/')[2]
+    const realPath = location.pathname.split("/")[2];
     if (realPath !== path) {
-      setPath(realPath)
+      setPath(realPath);
     }
-  }, [location])
+  }, [location]);
 
   const changeRoute = (_: any, path: string) => {
-    setPath(path)
-    navigate(path)
-  }
+    setPath(path);
+    navigate(path);
+  };
 
   return (
     <BottomNavigation
-      showLabels
       value={path}
       onChange={changeRoute}
       sx={{
@@ -32,10 +30,9 @@ export const Navigation = () => {
         borderTop: "1px solid #e0e0e0",
       }}
     >
-      {ROUTES.map(({ text, icon, path }) => (
-        <BottomNavigationAction key={path} value={path} label={text} icon={icon} />
-      ))
-      }
+      {ROUTES.map(({ icon, path }) => (
+        <BottomNavigationAction key={path} value={path} icon={icon} />
+      ))}
     </BottomNavigation>
   );
 };

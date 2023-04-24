@@ -1,6 +1,3 @@
-
 export const RequiredDecos = () => {
-    return (
-        <div>RequiredDecos</div>
-    )
-}
+  return <div>En desarrollo</div>;
+};
