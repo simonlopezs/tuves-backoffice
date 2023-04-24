@@ -1,4 +1,6 @@
-export interface Deco {
+import { IBase } from "./Base.model"
+
+export interface IDeco extends IBase {
 
     nombre: string
     rut: string

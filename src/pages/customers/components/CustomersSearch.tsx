@@ -15,8 +15,7 @@ export const CustomersSearch = () => {
         <FormControl
             sx={{ p: 1, width: "100%", boxSizing: "border-box" }}
             variant="outlined"
-        >
-            <OutlinedInput
+        >   <OutlinedInput
                 placeholder="Buscar"
                 type="text"
                 onChange={(e) => setTerm(e.target.value)}

@@ -1,52 +1,52 @@
-import { ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
-import { ICustomer } from '../../../models'
-import { Done, ErrorOutline } from '@mui/icons-material'
-import { useLayoutContext } from '../../../layout/LayoutContext'
-import { CustomerDetails } from './CustomerDetails'
-import { startCase } from 'lodash'
-import { formatRut } from '../../../utils/formatRut'
-import { titlecase } from '../../../utils/titlecase'
-import { StateIcon } from './StateIcon'
+import {
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import { useLayoutContext } from "../../../layout/LayoutContext";
+import { CustomerDetails } from "./CustomerDetails";
+import { StateIcon } from "./StateIcon";
+import { Customer } from "../../../classes/Customer";
 
 interface CustomerListItemProps {
-  customer: ICustomer,
-  style: any
+  customer: Customer;
+  style: any;
 }
 
-
-export const CustomerListItem = ({ customer, style }: CustomerListItemProps) => {
-  const { setDrawerContent } = useLayoutContext()
-  const selectCustomer = (customer: ICustomer) =>
-    setDrawerContent(<CustomerDetails customer={customer} />)
+export const CustomerListItem = ({
+  customer,
+  style,
+}: CustomerListItemProps) => {
+  const { setDrawerContent } = useLayoutContext();
+  const selectCustomer = (customer: Customer) =>
+    setDrawerContent(<CustomerDetails customer={customer} />);
 
   return (
     <ListItem
       style={style}
       onClick={() => selectCustomer(customer)}
-      key={customer.RUT}
+      key={customer.getId()}
       disablePadding
-
-
     >
       <ListItemButton disableRipple>
         <ListItemIcon>
-          {<StateIcon daysLate={customer['DIAS_SIN_RECARGAR']} />}
+          {<StateIcon daysLate={customer.getDaysLate()} />}
         </ListItemIcon>
         <ListItemText
-          primary={titlecase(customer['NOMBRE'])}
-          secondary={(<>
-            <Typography
-              component="span"
-              variant="body2"
-              color="text.primary"
-            >
-              {formatRut(customer['RUT'])}
-            </Typography>
-            <br /> {titlecase(customer['COMUNA'])} &nbsp;&nbsp;|&nbsp;&nbsp; {customer['FECHA_INST']}
-          </>
-          )}
+          primary={customer.getName()}
+          secondary={
+            <>
+              <Typography component="span" variant="body2" color="text.primary">
+                {customer.getRut()}
+              </Typography>
+              <br /> {customer.getCommune()} &nbsp;&nbsp;|&nbsp;&nbsp;
+              {customer.getDate("instalacion")}
+            </>
+          }
         />
       </ListItemButton>
     </ListItem>
-  )
-}
+  );
+};

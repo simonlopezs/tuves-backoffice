@@ -1,15 +1,16 @@
-import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, QueryDocumentSnapshot, DocumentData, orderBy, startAfter, endBefore, limitToLast } from "firebase/firestore";
+import { collectionGroup, getFirestore, query, where, doc, getDocs, collection, limit, getDoc, Firestore, writeBatch, QueryDocumentSnapshot, DocumentData, orderBy, startAfter } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
-import { User } from "../models";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { compact, first, last, merge } from "lodash";
+import { compact, last } from "lodash";
+import { User } from "../classes/User";
 
 
 export type Collection =
     | 'users'
     | 'customers'
-// | 'decos'
+    | 'decos'
+
 export interface QueryOptions {
     orderBy?: string
     orderDirection?: 'asc' | 'desc'
@@ -39,7 +40,8 @@ export class DbConnector {
         this.basePath = `tenants/${tenantId}`
     }
 
-    async get<T>(collectionName: string, queryOptions?: QueryOptions): Promise<{ data: T[], nextCursor: DocumentCursor }> {
+    async get<T>(collectionName: Collection, queryOptions?: QueryOptions): Promise<{ data: T[], nextCursor: DocumentCursor }> {
+
         const { orderBy: _orderBy, limit: _limit, cursor, orderDirection }
             = queryOptions || defaultQueryOptions
 
@@ -53,7 +55,7 @@ export class DbConnector {
         ))
             .then((querySnapshot) => {
                 const nextCursor = last(querySnapshot.docs)
-                const data = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as T))
+                const data = querySnapshot.docs.map(doc => ({ ...doc.data(), _id: doc.id } as T))
                 return { data, nextCursor }
             })
     }

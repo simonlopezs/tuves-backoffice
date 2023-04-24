@@ -1,5 +1,5 @@
 import { PropsWithChildren, useState } from "react";
-import { Alert, Box, Snackbar } from "@mui/material";
+import { Box, Grow, Snackbar } from "@mui/material";
 import { Navigation } from "./Navigation";
 import { Header } from "./Header";
 import { DrawerContent, LayoutProvider } from "./LayoutContext";
@@ -10,11 +10,10 @@ const HEADER_HEIGHT = 52;
 
 export type SnackbarContent = {
   message: string;
-  type: 'success' | 'info' | 'warning' | 'error';
-}
+  type: "success" | "info" | "warning" | "error";
+};
 
 export const Layout = ({ children }: PropsWithChildren) => {
-
   // drawer
   const [drawerContent, setDrawerContent] = useState<DrawerContent>(null);
   const closeDrawer = () => setDrawerContent(null);
@@ -28,28 +27,30 @@ export const Layout = ({ children }: PropsWithChildren) => {
   const [snackbar, setSnackbar] = useState<SnackbarContent | null>(null);
 
   const handleClose = (_: any, reason?: string) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setSnackbar(null);
   };
 
   return (
-    <LayoutProvider value={{
-      drawerContent,
-      setDrawerContent,
-      closeDrawer,
-      isLoading,
-      load,
-      stopLoad,
-      showSnackbar: setSnackbar,
-    }}>
+    <LayoutProvider
+      value={{
+        drawerContent,
+        setDrawerContent,
+        closeDrawer,
+        isLoading,
+        load,
+        stopLoad,
+        showSnackbar: setSnackbar,
+      }}
+    >
       <Box>
         <Header height={HEADER_HEIGHT} />
         <Box
           sx={{
             height: `calc(100vh - 56px - ${HEADER_HEIGHT}px)`,
-            overflow: 'hidden'
+            overflow: "hidden",
           }}
         >
           <OverallSpinner open={isLoading} />
@@ -57,12 +58,10 @@ export const Layout = ({ children }: PropsWithChildren) => {
             open={!!snackbar}
             autoHideDuration={6000}
             onClose={handleClose}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert variant='filled' onClose={handleClose} severity={snackbar?.type} sx={{ width: '100%' }}>
-              {snackbar?.message}
-            </Alert>
-          </Snackbar>
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            message={snackbar?.message || ""}
+            TransitionComponent={(props) => <Grow {...props} />}
+          />
           {children}
         </Box>
         <Navigation />
