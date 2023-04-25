@@ -7,32 +7,36 @@ import { IconButton } from "@mui/material";
 
 interface StateIconProps {
   daysLate: number | null;
+  size?: "small" | "medium" | "large";
 }
 
 type State = "ok" | "warning" | "error";
 
 const states: Record<
   State,
-  { icon: JSX.Element; color: "success" | "warning" | "error" }
+  {
+    icon: (size: "small" | "medium" | "large") => JSX.Element;
+    color: "success" | "warning" | "error";
+  }
 > = {
   ok: {
-    icon: <CheckCircleOutline />,
+    icon: (size) => <CheckCircleOutline fontSize={size} />,
     color: "success",
   },
   warning: {
-    icon: <ErrorOutline />,
+    icon: (size) => <ErrorOutline fontSize={size} />,
     color: "warning",
   },
   error: {
-    icon: <ErrorOutline />,
+    icon: (size) => <ErrorOutline fontSize={size} />,
     color: "error",
   },
 };
 
-export const StateIcon = ({ daysLate }: StateIconProps) => {
+export const StateIcon = ({ daysLate, size = "medium" }: StateIconProps) => {
   if (!daysLate)
     return (
-      <IconButton>
+      <IconButton size={size}>
         <QuestionMark />
       </IconButton>
     );
@@ -42,7 +46,7 @@ export const StateIcon = ({ daysLate }: StateIconProps) => {
   const stateData = states[state];
   return (
     <IconButton aria-label={state} color={stateData.color}>
-      {stateData.icon}
+      {stateData.icon(size)}
     </IconButton>
   );
 };

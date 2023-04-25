@@ -2,6 +2,8 @@ import { addDays, differenceInDays, format, toDate } from "date-fns";
 import { ICustomer } from "../models";
 import { formatRut } from "../utils/formatRut";
 import { titlecase } from "../utils/titlecase";
+import { upperFirst } from "lodash";
+import { formatPhone } from "../utils/formatPhone";
 
 enum DateName {
   "ingreso" = "fechaIngreso",
@@ -43,8 +45,19 @@ export class Customer {
     return this.data.abonado;
   }
 
+  getPayments() {
+    return this.data.pagos;
+  }
+
   getAddress() {
-    return this.data.direccion;
+    const address = this.data.direccion;
+    const [street, number] = address
+      .split(",")
+      .map((chunk) => chunk.split(":")[1]?.trim())
+      .slice(0, 2);
+    return `${titlecase(street)}${
+      number ? " #" + number : ""
+    }, ${this.getTown()}`;
   }
 
   getTown() {
@@ -100,14 +113,22 @@ export class Customer {
   }
 
   call(phone: string) {
-    console.log("calling", phone);
+    this.contact(phone, "phone");
   }
 
   sendWhatsapp(phone: string) {
-    console.log("sending whatsapp to", phone);
+    this.contact(phone, "whatsapp");
   }
 
-  private cleanPhone(phone: string) {
-    return phone.replaceAll(/[^0-9]/g, "").trim();
+  private contact(phone: string, mode: "whatsapp" | "phone") {
+    const formattedPhone = formatPhone(phone);
+    const message = encodeURIComponent(
+      "Hola " + this.getName().split(" ")[0] + ", tenemos promoción de TuVes"
+    );
+    const url = `https://wa.me/${formattedPhone}?text=${message}`;
+    const a = document.createElement("a");
+    a.href = mode === "whatsapp" ? url : `tel:+${formattedPhone}`;
+    a.target = "_blank";
+    a.click();
   }
 }
