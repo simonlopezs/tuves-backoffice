@@ -7,12 +7,12 @@ const tabs = [
     path: "late",
   },
   {
-    label: "Buscar",
-    path: "search",
-  },
-  {
     label: "Todos",
     path: "all",
+  },
+  {
+    label: "Buscar",
+    path: "search",
   },
 ];
 

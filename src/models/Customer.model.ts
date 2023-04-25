@@ -26,8 +26,8 @@ export interface ICustomer extends IBase {
   fechaIngreso: Date | number;
   fechaInst: Date | number;
   fechaIngresoContratoActual: Date | number;
-  fechaCancela: Date | number;
-  finRecarga: Date | number;
+  fechaCancela: Date | number | null;
+  finRecarga: Date | number | null;
 
   urbanizacion: string;
 }

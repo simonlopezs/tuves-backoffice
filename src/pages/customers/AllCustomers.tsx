@@ -21,7 +21,7 @@ export const AllCustomers = () => {
       orderDirection,
       cursor,
     };
-    if (filter) queryOptions.filter = filter;
+    if (filter) queryOptions.filters = [filter];
     return dbConnector
       .get<ICustomer>("customers", queryOptions)
       .then(({ data, nextCursor }) => ({
@@ -31,11 +31,15 @@ export const AllCustomers = () => {
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery(["customers", orderBy, orderDirection], fetchCustomers, {
-      getNextPageParam: (lastPage) => lastPage?.nextCursor,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 60 * 24,
-    });
+    useInfiniteQuery(
+      ["customers", { orderBy, orderDirection, filter }],
+      fetchCustomers,
+      {
+        getNextPageParam: (lastPage) => lastPage?.nextCursor,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 60 * 24,
+      }
+    );
 
   const customers = flatten(data?.pages.map(({ data }) => data) || []);
 

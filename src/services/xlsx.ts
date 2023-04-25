@@ -33,6 +33,7 @@ class XLSXService {
                 .mapKeys((_, k: string) => camelCase(k.toLowerCase()))
                 .mapValues((v, k) => {
                   const dateRegex = /\d{4}[-]\d{1,2}[-]\d{1,2}/g;
+                  if (k === "finRecarga" && v === "0") return null;
                   if (typeof v === "string" && v.match(dateRegex)?.length)
                     return this.dateFromString(v);
                   if (numberKeys.includes(k)) {

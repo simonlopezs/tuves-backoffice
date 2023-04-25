@@ -19,8 +19,8 @@ const options = [
     key: "fechaInst",
   },
   {
-    label: "Días sin recargar",
-    key: "diasSinRecargar",
+    label: "Fecha fin recarga",
+    key: "finRecarga",
   },
 ];
 

@@ -13,7 +13,7 @@ enum DateName {
 
 type DateNameKey = keyof typeof DateName;
 export class Customer {
-  data: ICustomer;
+  private data: ICustomer;
 
   constructor(customer: ICustomer) {
     this.data = customer;
@@ -61,29 +61,42 @@ export class Customer {
 
   getDate(dateName: DateNameKey, asString = true) {
     const date = this.data[DateName[dateName]];
-    if (!date) return "";
+    if (!date) return asString ? "" : null;
     return asString ? format(date, "dd-MM-yyyy") : date;
   }
 
-  getDaysLate() {
+  getDateAgo(dateName: DateNameKey) {
+    const date = this.data[DateName[dateName]];
+    if (!date) return "";
     const today = new Date().setHours(12, 0, 0, 0);
+    const diff = differenceInDays(today, date);
+    return `hace ${diff} día${diff > 1 ? "s" : ""}`;
+  }
+
+  getDaysLate() {
     const end = this.getDate("finRecarga", false) as Date;
+    if (!end) return null;
+    const today = new Date().setHours(12, 0, 0, 0);
     const diff = differenceInDays(today, end);
     return diff;
   }
 
   getLimitDate() {
     const end = this.getDate("finRecarga", false) as Date;
-    const limit = toDate(end);
-    addDays(limit, 60);
+    if (!end) return null;
+    const limit = addDays(end, 60);
     return limit;
   }
 
   getDaysToLimitDate() {
-    const today = new Date();
     const limit = this.getLimitDate();
+    if (!limit) return null;
+    const today = new Date();
     const diff = differenceInDays(limit, today);
-    return diff;
+    if (diff === 0) return "hoy";
+    return `${diff > 0 ? "en" : "hace"} ${Math.abs(diff)} día${
+      Math.abs(diff) > 1 ? "s" : ""
+    }`;
   }
 
   call(phone: string) {

@@ -1,7 +1,91 @@
-import React from 'react'
+import { useInfiniteQuery } from "react-query";
+import { QueryOptions, dbConnector } from "../../api/db-connector";
+import { ICustomer } from "../../models";
+import { useState } from "react";
+import { flatten } from "lodash";
+import { CustomerListItem } from "./components/CustomerListItem";
+import { InfiniteList } from "../../components/InfiniteList";
+import { Box, Button, ButtonGroup, Divider, Stack } from "@mui/material";
+import { Customer } from "../../classes/Customer";
+import { lastDayOfMonth, subDays } from "date-fns";
+
+type Period = "current" | "next";
 
 export const LateCustomers = () => {
-    return (
-        <div>LateCustomers</div>
-    )
-}
+  const [period, setPeriod] = useState<Period>("current");
+  const deltaDays = period === "current" ? 0 : 30;
+  const infDate = subDays(lastDayOfMonth(new Date()), 90 - deltaDays);
+  const supDate = subDays(lastDayOfMonth(new Date()), 60 - deltaDays);
+
+  const fetchCustomers = async ({ pageParam: cursor = undefined }) => {
+    const queryOptions: QueryOptions = {
+      orderBy: "finRecarga",
+      orderDirection: "asc",
+      filters: [
+        { key: "finRecarga", operator: ">=", value: infDate },
+        { key: "finRecarga", operator: "<=", value: supDate },
+      ],
+      cursor,
+    };
+
+    return dbConnector
+      .get<ICustomer>("customers", queryOptions)
+      .then(({ data, nextCursor }) => ({
+        data: data.map((item) => new Customer(item)),
+        nextCursor,
+      }));
+  };
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery(
+      ["customers", "late", { infDate, supDate }],
+      fetchCustomers,
+      {
+        getNextPageParam: (lastPage) => lastPage?.nextCursor,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 60 * 24,
+      }
+    );
+
+  const customers = flatten(data?.pages.map(({ data }) => data) || []);
+
+  return (
+    <>
+      <Stack padding={1}>
+        <ButtonGroup
+          fullWidth
+          variant="outlined"
+          aria-label="outlined button group"
+        >
+          <Button
+            disableElevation
+            variant={period === "current" ? "contained" : "outlined"}
+            onClick={() => setPeriod("current")}
+          >
+            Este mes
+          </Button>
+          <Button
+            disableElevation
+            variant={period === "next" ? "contained" : "outlined"}
+            onClick={() => setPeriod("next")}
+          >
+            Próximo mes
+          </Button>
+        </ButtonGroup>
+      </Stack>
+      <Divider />
+      <InfiniteList
+        hasNextPage={hasNextPage || false}
+        isNextPageLoading={isFetchingNextPage}
+        items={customers}
+        loadNextPage={fetchNextPage}
+        itemSize={92.03}
+        subHeight={52.5}
+      >
+        {({ item, style }) => (
+          <CustomerListItem style={style} customer={item} />
+        )}
+      </InfiniteList>
+    </>
+  );
+};

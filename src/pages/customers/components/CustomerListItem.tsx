@@ -1,14 +1,20 @@
 import {
+  Box,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useLayoutContext } from "../../../layout/LayoutContext";
 import { CustomerDetails } from "./CustomerDetails";
 import { StateIcon } from "./StateIcon";
 import { Customer } from "../../../classes/Customer";
+import {
+  HomeRepairServiceOutlined,
+  PersonOffOutlined,
+} from "@mui/icons-material";
 
 interface CustomerListItemProps {
   customer: Customer;
@@ -41,8 +47,25 @@ export const CustomerListItem = ({
               <Typography component="span" variant="body2" color="text.primary">
                 {customer.getRut()}
               </Typography>
-              <br /> {customer.getCommune()} &nbsp;&nbsp;|&nbsp;&nbsp;
-              {customer.getDate("instalacion")}
+              <span style={{ display: "flex", gap: "16px" }}>
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    width: "50%",
+                  }}
+                >
+                  <HomeRepairServiceOutlined fontSize="small" />
+                  <span>{customer.getDateAgo("instalacion")}</span>
+                </span>
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <PersonOffOutlined fontSize="small" />
+                  <span>{customer.getDaysToLimitDate()}</span>
+                </span>
+              </span>
             </>
           }
         />

@@ -77,6 +77,15 @@ export const FilterMenu = ({ filter, setFilter }: FilterMenuProps) => {
     handleClose();
   };
 
+  const cleanFilter = () => {
+    setFilter(null);
+    handleClose();
+  };
+
+  const isDisabled = Boolean(
+    filter && filterKey === filter.key && filterValue === filter.value
+  );
+
   return (
     <>
       <Fab
@@ -85,6 +94,7 @@ export const FilterMenu = ({ filter, setFilter }: FilterMenuProps) => {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         size="medium"
+        color={filter ? "primary" : "default"}
       >
         <FilterAltOutlined />
       </Fab>
@@ -118,9 +128,14 @@ export const FilterMenu = ({ filter, setFilter }: FilterMenuProps) => {
             <FilterControl {...{ filterValue, setFilterValue }} data={items} />
           )}
           {filterKey === "fechaInst" && <p>En desarrollo</p>}
-          <Button onClick={handleFilter} variant="contained">
+          <Button
+            disabled={isDisabled}
+            onClick={handleFilter}
+            variant="contained"
+          >
             Filtrar
           </Button>
+          <Button onClick={cleanFilter}>Quitar filtro</Button>
         </Stack>
       </Menu>
     </>

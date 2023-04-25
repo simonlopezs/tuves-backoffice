@@ -31,7 +31,7 @@ export interface QueryOptions {
   orderDirection?: "asc" | "desc";
   limit?: number;
   cursor?: QueryDocumentSnapshot<DocumentData>;
-  filter?: Filter;
+  filters?: Filter[];
 }
 
 export interface Filter {
@@ -70,14 +70,16 @@ export class DbConnector {
       limit: _limit,
       cursor,
       orderDirection,
-      filter,
+      filters,
     } = queryOptions || defaultQueryOptions;
 
     const queryConstraints = compact([
       orderBy(_orderBy || "createdAt", orderDirection || "desc"),
       cursor ? startAfter(cursor) : undefined,
       limit(_limit || 10),
-      filter ? where(filter.key, filter.operator, filter.value) : undefined,
+      ...(filters?.map((filter) =>
+        where(filter.key, filter.operator, filter.value)
+      ) || []),
     ]);
     return getDocs(
       query(

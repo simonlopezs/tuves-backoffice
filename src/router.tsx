@@ -33,7 +33,7 @@ export const ROUTES: AppRoute[] = [
     children: [
       {
         path: "",
-        element: <Navigate to="all" />,
+        element: <Navigate to="late" />,
       },
       {
         text: "Todos",
