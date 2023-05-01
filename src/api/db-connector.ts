@@ -72,6 +72,7 @@ export class DbConnector {
       orderDirection,
       filters,
     } = queryOptions || defaultQueryOptions;
+    console.log(queryOptions);
 
     const queryConstraints = compact([
       orderBy(_orderBy || "createdAt", orderDirection || "desc"),

@@ -1,4 +1,11 @@
-import { addDays, differenceInDays, format, toDate } from "date-fns";
+import {
+  addDays,
+  differenceInDays,
+  endOfDay,
+  format,
+  startOfDay,
+  toDate,
+} from "date-fns";
 import { ICustomer } from "../models";
 import { formatRut } from "../utils/formatRut";
 import { titlecase } from "../utils/titlecase";
@@ -105,7 +112,7 @@ export class Customer {
     const limit = this.getLimitDate();
     if (!limit) return null;
     const today = new Date();
-    const diff = differenceInDays(limit, today);
+    const diff = differenceInDays(endOfDay(limit), startOfDay(today));
     if (diff === 0) return "hoy";
     return `${diff > 0 ? "en" : "hace"} ${Math.abs(diff)} día${
       Math.abs(diff) > 1 ? "s" : ""

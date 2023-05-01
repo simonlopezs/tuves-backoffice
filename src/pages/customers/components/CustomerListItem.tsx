@@ -53,7 +53,6 @@ export const CustomerListItem = ({
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
-                    width: "50%",
                   }}
                 >
                   <HomeRepairServiceOutlined fontSize="small" />

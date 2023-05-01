@@ -5,17 +5,18 @@ import { useState } from "react";
 import { flatten } from "lodash";
 import { CustomerListItem } from "./components/CustomerListItem";
 import { InfiniteList } from "../../components/InfiniteList";
-import { Box, Button, ButtonGroup, Divider, Stack } from "@mui/material";
+import { Button, ButtonGroup, Divider, Stack } from "@mui/material";
 import { Customer } from "../../classes/Customer";
-import { lastDayOfMonth, subDays } from "date-fns";
+import { lastDayOfMonth, subMonths } from "date-fns";
+import { OverallSpinner } from "../../components/OverallSpinner";
 
 type Period = "current" | "next";
 
 export const LateCustomers = () => {
   const [period, setPeriod] = useState<Period>("current");
-  const deltaDays = period === "current" ? 0 : 30;
-  const infDate = subDays(lastDayOfMonth(new Date()), 90 - deltaDays);
-  const supDate = subDays(lastDayOfMonth(new Date()), 60 - deltaDays);
+  const deltaMonth = period === "current" ? 0 : 1;
+  const infDate = subMonths(lastDayOfMonth(new Date()), 3 - deltaMonth);
+  const supDate = subMonths(lastDayOfMonth(new Date()), 2 - deltaMonth);
 
   const fetchCustomers = async ({ pageParam: cursor = undefined }) => {
     const queryOptions: QueryOptions = {
@@ -36,7 +37,7 @@ export const LateCustomers = () => {
       }));
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
       ["customers", "late", { infDate, supDate }],
       fetchCustomers,
@@ -51,6 +52,7 @@ export const LateCustomers = () => {
 
   return (
     <>
+      <OverallSpinner open={isLoading} />
       <Stack padding={1}>
         <ButtonGroup
           fullWidth

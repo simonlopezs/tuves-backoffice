@@ -9,6 +9,7 @@ import { Stack } from "@mui/material";
 import { SortMenu } from "./components/SortMenu";
 import { Customer } from "../../classes/Customer";
 import { FilterMenu } from "./components/FilterMenu";
+import { OverallSpinner } from "../../components/OverallSpinner";
 
 export const AllCustomers = () => {
   const [orderBy, setOrderBy] = useState("fechaInst");
@@ -30,7 +31,7 @@ export const AllCustomers = () => {
       }));
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
       ["customers", { orderBy, orderDirection, filter }],
       fetchCustomers,
@@ -45,6 +46,7 @@ export const AllCustomers = () => {
 
   return (
     <>
+      <OverallSpinner open={isLoading} />
       <InfiniteList
         hasNextPage={hasNextPage || false}
         isNextPageLoading={isFetchingNextPage}
@@ -56,7 +58,6 @@ export const AllCustomers = () => {
           <CustomerListItem style={style} customer={item} />
         )}
       </InfiniteList>
-
       <Stack spacing={2} sx={{ position: "fixed", bottom: 55 + 16, right: 16 }}>
         <SortMenu
           {...{ orderBy, setOrderBy, orderDirection, setOrderDirection }}
