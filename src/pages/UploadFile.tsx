@@ -10,20 +10,14 @@ import { chain, compact, uniqBy } from "lodash";
 
 const fileTypes: Record<FileType, string> = {
   customers: "Cartera de clientes",
-  "all-decos": "Retiro de decos libres",
-  "own-decos": "Retiro de decos propios",
+  decos: "Retiro de decos",
 };
 
 type ResultError = "string";
 
-const persistData = (data: ICustomer[]) =>
-  dbConnector.saveBatch("customers", data, "rut").then(() => {
-    const communes = chain(data)
-      .groupBy("comuna")
-      .mapValues((c) => uniqBy(c, "urbanizacion").map((v) => v.urbanizacion))
-      .toPairs()
-      .map(([commune, towns]) => ({ name: commune, towns: compact(towns) }))
-      .value();
+const persistData = (data: ICustomer[], collection: "customers" | "decos") =>
+  dbConnector.saveBatch(collection, data, "rut").then(() => {
+    const communes = formatCommunes(data);
     return dbConnector.save("meta", { data: communes }, "communes");
   });
 
@@ -31,31 +25,34 @@ export const UploadFile = () => {
   const [result, setResult] = useState<UploadResult | ResultError | null>(null);
   const { load, stopLoad, showSnackbar } = useLayoutContext();
   const fileInput = useRef<HTMLInputElement>(null);
-  const mutation = useMutation((data: ICustomer[]) => persistData(data), {
-    onMutate: () => {
-      load();
-    },
-    onSuccess: () => {
-      showSnackbar({
-        message: "Los datos se guardaron correctamente",
-        type: "success",
-      });
-    },
-    onError: (err) => {
-      showSnackbar({
-        message: "Hubo un error al guardar los datos",
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      stopLoad();
-      cancel();
-    },
-  });
+  const mutation = useMutation(
+    (result: UploadResult) => persistData(result.data, result.type),
+    {
+      onMutate: () => {
+        load();
+      },
+      onSuccess: () => {
+        showSnackbar({
+          message: "Los datos se guardaron correctamente",
+          type: "success",
+        });
+      },
+      onError: (err) => {
+        showSnackbar({
+          message: "Hubo un error al guardar los datos",
+          type: "error",
+        });
+      },
+      onSettled: () => {
+        stopLoad();
+        cancel();
+      },
+    }
+  );
 
   const saveData = () => {
     if (!result || typeof result === "string") return;
-    mutation.mutate(result.data);
+    mutation.mutate(result);
   };
 
   const onFileChange = async (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,4 +141,13 @@ export const UploadFile = () => {
       />
     </Box>
   );
+};
+
+const formatCommunes = (data: { comuna: string; urbanizacion: string }[]) => {
+  return chain(data)
+    .groupBy("comuna")
+    .mapValues((c) => uniqBy(c, "urbanizacion").map((v) => v.urbanizacion))
+    .toPairs()
+    .map(([commune, towns]) => ({ name: commune, towns: compact(towns) }))
+    .value();
 };

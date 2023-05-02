@@ -3,18 +3,19 @@ import { NavTabs } from "../../components/NavTabs";
 
 const tabs = [
   {
-    label: "Propios",
-    path: "own",
-  },
-  {
     label: "Libres",
     path: "free",
+  },
+  {
+    label: "Propios",
+    path: "own",
   },
 ];
 
 export const Decos = () => {
   return (
     <>
+      {/* {JSON.stringify(location)} */}
       <NavTabs tabs={tabs} />
       <Outlet />
     </>

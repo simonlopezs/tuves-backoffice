@@ -63,7 +63,7 @@ export const ROUTES: AppRoute[] = [
     children: [
       {
         path: "",
-        element: <Navigate to="own" />,
+        element: <Navigate to="free" />,
       },
       {
         text: "Propios",

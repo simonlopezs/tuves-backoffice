@@ -39,7 +39,7 @@ export interface QueryOptions {
 
 export interface Filter {
   key: string;
-  operator: "==" | "<" | ">" | "<=" | ">=" | "array-contains" | "in";
+  operator: "==" | "<" | ">" | "<=" | ">=" | "!=" | "array-contains" | "in";
   value: any;
 }
 

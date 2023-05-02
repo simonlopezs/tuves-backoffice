@@ -1,13 +1,16 @@
-import { camelCase, chain, isNaN } from "lodash";
+import { camelCase, chain, compact, isNaN, omit, pick } from "lodash";
 import { read, utils } from "xlsx";
 
-export type FileType = "customers" | "own-decos" | "all-decos";
+export type FileType = "customers" | "decos";
 const numberKeys = ["pagos", "deuda", "diasSinRecargar"];
+const optionalDateKeys = ["fchFinalizacion", "fchIngreso", "finRecarga"];
 export interface UploadResult {
   data: any[];
   type: FileType;
 }
 class XLSXService {
+  data: any[] = [];
+
   loadFile(file: File): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -21,38 +24,26 @@ class XLSXService {
           const first = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[first];
 
-          const data = utils
-            .sheet_to_json(worksheet, {
-              dateNF: "dd/mm/yyyy",
-              defval: "",
-              blankrows: false,
-              raw: false,
-            })
-            .map((item: any) => ({
-              ...chain(item)
-                .mapKeys((_, k: string) => camelCase(k.toLowerCase()))
-                .mapValues((v, k) => {
-                  const dateRegex = /\d{4}[-]\d{1,2}[-]\d{1,2}/g;
-                  if (k === "finRecarga" && v === "0") return null;
-                  if (typeof v === "string" && v.match(dateRegex)?.length)
-                    return this.dateFromString(v);
-                  if (numberKeys.includes(k)) {
-                    return isNaN(Number(v)) ? v : Number(v);
-                  }
-                  return typeof v === "string" ? v.trim().toLowerCase() : v;
-                })
-                .value(),
-              urbanizacion:
-                (item["DIRECCION"]?.includes("Urb:")
-                  ? item["DIRECCION"].split("Urb:")[1].trim().toLowerCase()
-                  : item["DIRECCION"].split(",")[0].trim().toLowerCase()) || "",
-            }));
-          if (!data.length) throw new Error("Archivo sin registros");
+          this.data = utils.sheet_to_json(worksheet, {
+            dateNF: "dd/mm/yyyy",
+            defval: "",
+            blankrows: false,
+            raw: false,
+          });
+
+          this.formatData().addUrbanizacion().formatDecoData(type);
+
+          if (!this.data.length) throw new Error("Archivo sin registros");
+
+          console.log(this.data);
+          const data = [...this.data];
+          this.data = [];
           resolve({
             data,
             type,
           });
         } catch (err: any) {
+          this.data = [];
           reject(err);
         }
       };
@@ -69,13 +60,81 @@ class XLSXService {
     fileName = fileName.toLowerCase();
     const type = fileName.includes("cartera")
       ? "customers"
-      : fileName.includes("kpi")
-      ? "own-decos"
-      : fileName.includes("base")
-      ? "all-decos"
+      : ["kpi", "base"].some((v) => fileName.includes(v))
+      ? "decos"
       : null;
     if (!type) throw new Error("Archivo no reconocido");
     return type;
+  }
+
+  private formatData() {
+    this.data = this.data.map((item: any) => ({
+      ...chain(item)
+        .mapKeys((_, k: string) => camelCase(k.toLowerCase()))
+        .mapValues((v, k) => {
+          const dateRegex = /\d{4}[-]\d{1,2}[-]\d{1,2}/g;
+          if (optionalDateKeys.includes(k) && v === "0") return null;
+          if (typeof v === "string" && v.match(dateRegex)?.length)
+            return this.dateFromString(v);
+          if (numberKeys.includes(k)) {
+            return isNaN(Number(v)) ? v : Number(v);
+          }
+          if (k === "ubicacion") {
+            return v.split(",").map((v: string) => Number(v.trim()));
+          }
+          if (k === "direccion") {
+            return v
+              .split(",")
+              .map((v: string) => v.trim())
+              .join(", ")
+              .toLowerCase();
+          }
+          return typeof v === "string" ? v.trim().toLowerCase() : v;
+        })
+        .value(),
+    }));
+    return this;
+  }
+
+  private addUrbanizacion() {
+    this.data = this.data.map((item) => ({
+      ...item,
+      urbanizacion:
+        (item["direccion"]?.includes("urb:")
+          ? item["direccion"].split("urb:")[1].trim()
+          : item["direccion"].split(",")[0].trim()) || "",
+    }));
+    return this;
+  }
+
+  private formatDecoData(type: FileType) {
+    if (type === "decos") {
+      this.data = chain(this.data)
+        .groupBy("rut")
+        .toPairs()
+        .value()
+        .map(([_, values]) => {
+          const first = values[0];
+          return {
+            ...omit(first, [
+              "serial",
+              "tipo",
+              "econtrato",
+              "celular",
+              "casa",
+              "oficina",
+            ]),
+            decos: values.map((v) => pick(v, ["serial", "tipo", "econtrato"])),
+            cantidadDecos: values.length,
+            telefonos: compact([
+              first["celular"],
+              first["casa"],
+              first["oficina"],
+            ]),
+          };
+        });
+    }
+    return this;
   }
 
   private dateFromString(dateString: string) {
