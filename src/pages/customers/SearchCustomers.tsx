@@ -17,14 +17,19 @@ import { OverallSpinner } from "../../components/OverallSpinner";
 import { Search as SearchIcon, Close as CloseIcon } from "@mui/icons-material";
 
 export const SearchCustomers = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [term, setTerm] = useState<string>("");
-  const inputRef = useRef<HTMLElement | null>(null);
 
   const fetchCustomers = async ({ pageParam: cursor = undefined }) => {
     const queryOptions: QueryOptions = {
       orderBy: "fechaInst",
       orderDirection: "desc",
-      filters: [{ key: "nombre", operator: "==", value: term }],
+      filters: [
+        { key: "nombre", operator: "==", value: searchTerm },
+        { key: "rut", operator: "==", value: searchTerm },
+        { key: "abonado", operator: "==", value: searchTerm },
+      ],
+      filterMode: "or",
       cursor,
     };
 
@@ -37,43 +42,41 @@ export const SearchCustomers = () => {
   };
 
   const { data, isLoading } = useQuery(
-    ["customers", "search", { searchTerm: term }],
+    ["customers", "search", { searchTerm }],
     fetchCustomers,
     {
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 60 * 24,
-      enabled: !!term,
+      enabled: !!searchTerm,
     }
   );
 
   const customers = data ? data.data : [];
   const search = () => {
-    const term = (inputRef.current?.childNodes[0] as HTMLInputElement).value;
     if (!term) return;
-    setTerm(term);
+    setSearchTerm(term);
   };
 
-  const clear = () => {
-    setTerm("");
-    (inputRef.current?.childNodes[0] as HTMLInputElement).value = "";
-  };
+  const clear = () => setTerm("");
 
   return (
     <>
       <OverallSpinner open={isLoading} />
       <Stack padding={1}>
         <OutlinedInput
-          ref={inputRef}
+          value={term}
+          onChange={(ev) => setTerm(ev.target.value)}
           fullWidth
-          // placeholder="Buscar por nombre, rut o abonado"
-          placeholder="Buscar por nombre"
+          placeholder="Buscar por nombre, rut o abonado"
           endAdornment={
             <InputAdornment position="end">
               <Box>
-                <IconButton onClick={clear}>
-                  <CloseIcon />
-                </IconButton>
-                <IconButton onClick={search}>
+                {term && (
+                  <IconButton onClick={clear}>
+                    <CloseIcon />
+                  </IconButton>
+                )}
+                <IconButton disabled={!term} onClick={search}>
                   <SearchIcon />
                 </IconButton>
               </Box>
@@ -83,8 +86,8 @@ export const SearchCustomers = () => {
       </Stack>
       <Divider />
       <List>
-        {customers.map((item) => (
-          <CustomerListItem style={{}} customer={item} />
+        {customers.map((item, i) => (
+          <CustomerListItem key={i} style={{}} customer={item} />
         ))}
       </List>
     </>

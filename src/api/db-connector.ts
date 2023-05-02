@@ -17,11 +17,13 @@ import {
   Timestamp,
   setDoc,
   addDoc,
+  or,
+  QueryConstraint,
 } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { compact, last, mapValues } from "lodash";
+import { compact, flatten, last, mapValues } from "lodash";
 import { IUser } from "../models";
 
 export type Collection = "users" | "customers" | "decos";
@@ -32,6 +34,7 @@ export interface QueryOptions {
   limit?: number;
   cursor?: QueryDocumentSnapshot<DocumentData>;
   filters?: Filter[];
+  filterMode?: "and" | "or";
 }
 
 export interface Filter {
@@ -45,6 +48,7 @@ const defaultQueryOptions: QueryOptions = {
   orderDirection: "desc",
   limit: 10,
   cursor: undefined,
+  filterMode: "and",
 };
 
 export type DocumentCursor = QueryDocumentSnapshot<DocumentData> | undefined;
@@ -70,22 +74,25 @@ export class DbConnector {
       limit: _limit,
       cursor,
       orderDirection,
-      filters,
+      filters: _filters,
+      filterMode,
     } = queryOptions || defaultQueryOptions;
-    console.log(queryOptions);
+
+    const filters =
+      _filters?.map((filter) =>
+        where(filter.key, filter.operator, filter.value)
+      ) || [];
 
     const queryConstraints = compact([
+      filterMode === "or" ? or(...filters) : filters,
       orderBy(_orderBy || "createdAt", orderDirection || "desc"),
       cursor ? startAfter(cursor) : undefined,
       limit(_limit || 10),
-      ...(filters?.map((filter) =>
-        where(filter.key, filter.operator, filter.value)
-      ) || []),
     ]);
     return getDocs(
       query(
         collection(this.db, `${this.basePath}/${collectionName}`),
-        ...queryConstraints
+        ...flatten(queryConstraints as any[])
       )
     ).then((querySnapshot) => {
       const nextCursor = last(querySnapshot.docs);
