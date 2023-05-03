@@ -51,6 +51,8 @@ export class Deco {
   }
 
   getTown() {
+    const town = this.data.urbanizacion;
+    if (town === "null") return "-";
     return titlecase(this.data.urbanizacion);
   }
 
@@ -77,7 +79,8 @@ export class Deco {
   }
 
   getLocation() {
-    const [lat, lng] = this.data.ubicacion;
+    const { lng, lat } = this.data;
+    if (!lng || !lat) return null;
     return { lat, lng };
   }
 

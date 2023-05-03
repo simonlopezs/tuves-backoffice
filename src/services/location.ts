@@ -4,7 +4,15 @@ class LocationService {
   constructor() {}
 
   calculateDistance(location1: LngLat | null, location2: LngLat | null) {
-    if (!location1 || !location2) return null;
+    if (
+      !location1 ||
+      !location2 ||
+      !location1.lat ||
+      !location1.lng ||
+      !location2.lat ||
+      !location2.lng
+    )
+      return null;
     const R = 6371e3; // metres
     const φ1 = (location1.lat * Math.PI) / 180; // φ, λ in radians
     const φ2 = (location2.lat * Math.PI) / 180;

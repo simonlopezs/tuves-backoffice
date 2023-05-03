@@ -28,10 +28,6 @@ const options = [
     label: "Urbanización",
     key: "urbanizacion",
   },
-  {
-    label: "Cercanía",
-    key: "geohash",
-  },
 ];
 
 interface FilterMenuProps {

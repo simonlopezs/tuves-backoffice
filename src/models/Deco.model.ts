@@ -34,4 +34,7 @@ export interface IDeco extends IBase {
     econtrato: string;
   }[];
   cantidadDecos: number;
+  geohash: string | null;
+  lat: number | null;
+  lng: number | null;
 }

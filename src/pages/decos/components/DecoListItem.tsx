@@ -48,14 +48,14 @@ export const DecoListItem = ({ deco, style }: DecoListItemProps) => {
           secondary={
             <>
               <Typography component="span" variant="body2" color="text.primary">
-                {deco.getTown()}
+                {deco.getTown() || ""}
               </Typography>
               <span style={{ display: "flex", gap: "16px" }}>
                 <span
                   style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
                   <NavigationOutlined fontSize="small" />
-                  <span>{distance + " km"}</span>
+                  <span>{distance ? distance + " km" : ""}</span>
                 </span>
                 <span
                   style={{

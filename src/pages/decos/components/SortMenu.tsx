@@ -11,7 +11,7 @@ import { useState } from "react";
 
 const options = [
   {
-    label: "Nombre",
+    label: "Cercanía",
     key: "nombre",
   },
   {

@@ -112,20 +112,18 @@ class XLSXService {
         .value()
         .map(([_, values]) => {
           const first = values[0];
-          let [lng, lat]: any = (first.ubicacion as string)
+          let [lat, lng]: any = (first.ubicacion as string)
             .replaceAll(/[^\d\-\.\,]/g, "")
             .split(",-")
             .map((v: string) => Number(v.replaceAll(",", ".")))
-            .filter((v: number) => !isNaN(v));
+            .filter((v: number) => !isNaN(v))
+            .map((v) => -Math.abs(v));
           if (!lng || !lat) {
             lng = null;
             lat = null;
-          } else {
-            lat = -lat;
           }
           let geohash: string | null = null;
           if (lng && lat) geohash = Geofire.geohashForLocation([lat, lng]);
-
           return {
             ...omit(first, [
               "serial",
