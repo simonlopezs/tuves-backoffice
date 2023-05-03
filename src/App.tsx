@@ -20,6 +20,14 @@ const theme = createTheme({
         },
       },
     },
+    // MuiListItemButton: {
+    //   styleOverrides: {
+    //     root: {
+    //       paddingLeft: "8px",
+    //       paddingRight: "8px",
+    //     },
+    //   },
+    // },
   },
 });
 

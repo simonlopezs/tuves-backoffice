@@ -1,42 +1,23 @@
-export interface LonLat {
-  lon: number;
-  lat: number;
-}
-
-const options = {
-  enableHighAccuracy: false,
-  timeout: 5000,
-  maximumAge: 0,
-};
+import { LngLat } from "../models/LngLat.model";
 
 class LocationService {
-  currentLocation: LonLat | null = null;
+  constructor() {}
 
-  constructor() {
-    if (!navigator.geolocation) {
-      console.error("Geolocation is not supported by your browser");
-    } else this.startWatching();
-  }
+  calculateDistance(location1: LngLat | null, location2: LngLat | null) {
+    if (!location1 || !location2) return null;
+    const R = 6371e3; // metres
+    const φ1 = (location1.lat * Math.PI) / 180; // φ, λ in radians
+    const φ2 = (location2.lat * Math.PI) / 180;
+    const Δφ = ((location2.lat - location1.lat) * Math.PI) / 180;
+    const Δλ = ((location2.lng - location1.lng) * Math.PI) / 180;
 
-  startWatching() {
-    navigator.geolocation.watchPosition(
-      (position) => this.onSuccess(position),
-      this.onError,
-      options
-    );
-  }
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
 
-  private onSuccess(position: {
-    coords: { latitude: number; longitude: number };
-  }) {
-    const { latitude: lat, longitude: lon } = position.coords;
-    console.log("current location", { lon, lat });
-    this.currentLocation = { lon, lat };
-  }
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  private onError(err: any) {
-    console.error(`ERROR(${err.code}): ${err.message}`);
+    return Math.round((R * c) / 100) / 10; // in km
   }
 }
-
 export const locationService = new LocationService();

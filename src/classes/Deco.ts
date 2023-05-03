@@ -77,8 +77,8 @@ export class Deco {
   }
 
   getLocation() {
-    const [lat, lon] = this.data.ubicacion;
-    return { lat, lon };
+    const [lat, lng] = this.data.ubicacion;
+    return { lat, lng };
   }
 
   call(phone: string) {

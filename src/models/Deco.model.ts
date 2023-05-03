@@ -33,4 +33,5 @@ export interface IDeco extends IBase {
     tipo: string;
     econtrato: string;
   }[];
+  cantidadDecos: number;
 }

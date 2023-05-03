@@ -1,18 +1,15 @@
 import { useInfiniteQuery } from "react-query";
 import { Filter, QueryOptions, dbConnector } from "../../api/db-connector";
-import { ICustomer } from "../../models";
 import { useState } from "react";
 import { flatten } from "lodash";
 import { InfiniteList } from "../../components/InfiniteList";
-import { Button, ButtonGroup, Divider, Stack } from "@mui/material";
-import { Customer } from "../../classes/Customer";
-import { lastDayOfMonth, subMonths } from "date-fns";
 import { OverallSpinner } from "../../components/OverallSpinner";
 import { DecoListItem } from "./components/DecoListItem";
 import { IDeco } from "../../models/Deco.model";
 import { Deco } from "../../classes/Deco";
-
-type Period = "current" | "next";
+import { Stack } from "@mui/material";
+import { SortMenu } from "./components/SortMenu";
+import { FilterMenu } from "./components/FilterMenu";
 
 export const OptionalDecos = () => {
   const [orderBy, setOrderBy] = useState("fchIngreso");
@@ -21,8 +18,8 @@ export const OptionalDecos = () => {
 
   const fetchDecos = async ({ pageParam: cursor = undefined }) => {
     const queryOptions: QueryOptions = {
-      orderBy,
-      orderDirection,
+      orderBy: "cantidadDecos",
+      orderDirection: "desc",
       cursor,
     };
     return dbConnector
@@ -58,6 +55,9 @@ export const OptionalDecos = () => {
       >
         {({ item, style }) => <DecoListItem style={style} deco={item} />}
       </InfiniteList>
+      <Stack spacing={2} sx={{ position: "fixed", bottom: 55 + 16, right: 16 }}>
+        <FilterMenu {...{ filter, setFilter }} />
+      </Stack>
     </>
   );
 };

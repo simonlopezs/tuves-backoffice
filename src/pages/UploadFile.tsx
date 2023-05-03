@@ -6,7 +6,7 @@ import { useMutation } from "react-query";
 import { Upload, Close, Save } from "@mui/icons-material";
 import { useLayoutContext } from "../layout/LayoutContext";
 import { ICustomer } from "../models";
-import { chain, compact, uniqBy } from "lodash";
+import { chain, compact, orderBy, uniq, uniqBy } from "lodash";
 
 const fileTypes: Record<FileType, string> = {
   customers: "Cartera de clientes",
@@ -148,6 +148,15 @@ const formatCommunes = (data: { comuna: string; urbanizacion: string }[]) => {
     .groupBy("comuna")
     .mapValues((c) => uniqBy(c, "urbanizacion").map((v) => v.urbanizacion))
     .toPairs()
-    .map(([commune, towns]) => ({ name: commune, towns: compact(towns) }))
+    .map(([commune, towns]) => ({
+      name: commune,
+      towns: orderBy(
+        compact(
+          uniq(towns.map((t) => t.trim())).filter(
+            (v) => !["urb.", ".", "null", "s/n"].includes(v)
+          )
+        )
+      ),
+    }))
     .value();
 };

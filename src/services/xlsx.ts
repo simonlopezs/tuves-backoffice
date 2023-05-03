@@ -1,9 +1,10 @@
 import { camelCase, chain, compact, isNaN, omit, pick } from "lodash";
 import { read, utils } from "xlsx";
-
+import * as Geofire from "geofire-common";
 export type FileType = "customers" | "decos";
 const numberKeys = ["pagos", "deuda", "diasSinRecargar"];
 const optionalDateKeys = ["fchFinalizacion", "fchIngreso", "finRecarga"];
+
 export interface UploadResult {
   data: any[];
   type: FileType;
@@ -35,7 +36,6 @@ class XLSXService {
 
           if (!this.data.length) throw new Error("Archivo sin registros");
 
-          console.log(this.data);
           const data = [...this.data];
           this.data = [];
           resolve({
@@ -79,9 +79,6 @@ class XLSXService {
           if (numberKeys.includes(k)) {
             return isNaN(Number(v)) ? v : Number(v);
           }
-          if (k === "ubicacion") {
-            return v.split(",").map((v: string) => Number(v.trim()));
-          }
           if (k === "direccion") {
             return v
               .split(",")
@@ -115,6 +112,20 @@ class XLSXService {
         .value()
         .map(([_, values]) => {
           const first = values[0];
+          let [lng, lat]: any = (first.ubicacion as string)
+            .replaceAll(/[^\d\-\.\,]/g, "")
+            .split(",-")
+            .map((v: string) => Number(v.replaceAll(",", ".")))
+            .filter((v: number) => !isNaN(v));
+          if (!lng || !lat) {
+            lng = null;
+            lat = null;
+          } else {
+            lat = -lat;
+          }
+          let geohash: string | null = null;
+          if (lng && lat) geohash = Geofire.geohashForLocation([lat, lng]);
+
           return {
             ...omit(first, [
               "serial",
@@ -131,6 +142,9 @@ class XLSXService {
               first["casa"],
               first["oficina"],
             ]),
+            lng,
+            lat,
+            geohash,
           };
         });
     }

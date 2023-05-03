@@ -3,7 +3,6 @@ import {
   ErrorOutline,
   QuestionMark,
 } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
 
 interface StateIconProps {
   daysLate: number | null;
@@ -33,20 +32,12 @@ const states: Record<
   },
 };
 
-export const StateIcon = ({ daysLate, size = "medium" }: StateIconProps) => {
-  if (!daysLate)
-    return (
-      <IconButton size={size}>
-        <QuestionMark />
-      </IconButton>
-    );
+export const StateIcon = ({ daysLate, size = "large" }: StateIconProps) => {
+  if (!daysLate) return <QuestionMark fontSize={size} />;
 
   const state: State =
     daysLate <= 0 ? "ok" : daysLate <= 30 ? "warning" : "error";
   const stateData = states[state];
-  return (
-    <IconButton aria-label={state} color={stateData.color}>
-      {stateData.icon(size)}
-    </IconButton>
-  );
+  const icon = stateData.icon(size);
+  return icon;
 };

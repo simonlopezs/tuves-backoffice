@@ -23,7 +23,7 @@ import {
 import { firebaseApp } from "./firebase";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { compact, flatten, last, mapValues } from "lodash";
+import { chunk, compact, flatten, last, mapValues } from "lodash";
 import { IUser } from "../models";
 
 export type Collection = "users" | "customers" | "decos";
@@ -124,15 +124,17 @@ export class DbConnector {
   }
 
   async saveBatch(collectionName: string, data: any[], idKey?: string) {
-    // make chunks if data.length > 500
-    const batch = writeBatch(this.db);
-    data.forEach((item) => {
-      const docRef = idKey
-        ? doc(this.db, `${this.basePath}/${collectionName}`, item[idKey])
-        : doc(collection(this.db, `${this.basePath}/${collectionName}`));
-      batch.set(docRef, item);
-    });
-    return batch.commit();
+    const chunks = chunk(data, 500);
+    for (const chunk of chunks) {
+      const batch = writeBatch(this.db);
+      chunk.forEach((item) => {
+        const docRef = idKey
+          ? doc(this.db, `${this.basePath}/${collectionName}`, item[idKey])
+          : doc(collection(this.db, `${this.basePath}/${collectionName}`));
+        batch.set(docRef, item);
+      });
+      await batch.commit();
+    }
   }
 
   async save(collectionName: string, data: any, id?: string) {

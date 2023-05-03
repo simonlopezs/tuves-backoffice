@@ -8,11 +8,14 @@ import {
 import { useLayoutContext } from "../../../layout/LayoutContext";
 import { Deco } from "../../../classes/Deco";
 import {
-  Router as RouterIcon,
-  HomeRepairServiceOutlined,
+  RouterOutlined as RouterIcon,
+  NavigationOutlined,
 } from "@mui/icons-material";
 import { DecoDetails } from "./DecoDetails";
 import { StateIcon } from "./StateIcon";
+import { locationService } from "../../../services/location";
+import { useDecosContext } from "../DecosContext";
+import { useMemo } from "react";
 
 interface DecoListItemProps {
   deco: Deco;
@@ -21,6 +24,11 @@ interface DecoListItemProps {
 
 export const DecoListItem = ({ deco, style }: DecoListItemProps) => {
   const { setDrawerContent } = useLayoutContext();
+  const { location: myLocation } = useDecosContext();
+  const distance = useMemo(
+    () => locationService.calculateDistance(myLocation, deco.getLocation()),
+    [myLocation, location]
+  );
   const selectDeco = (deco: Deco) =>
     setDrawerContent(<DecoDetails deco={deco} />);
 
@@ -33,7 +41,7 @@ export const DecoListItem = ({ deco, style }: DecoListItemProps) => {
     >
       <ListItemButton disableRipple>
         <ListItemIcon>
-          {<StateIcon location={deco.getLocation()} />}
+          {<StateIcon distance={distance} size="large" />}
         </ListItemIcon>
         <ListItemText
           primary={deco.getName()}
@@ -46,8 +54,8 @@ export const DecoListItem = ({ deco, style }: DecoListItemProps) => {
                 <span
                   style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  <HomeRepairServiceOutlined fontSize="small" />
-                  <span>{deco.getDateAgo()}</span>
+                  <NavigationOutlined fontSize="small" />
+                  <span>{distance + " km"}</span>
                 </span>
                 <span
                   style={{

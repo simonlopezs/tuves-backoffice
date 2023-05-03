@@ -29,8 +29,8 @@ const options = [
     key: "urbanizacion",
   },
   {
-    label: "Fecha de instalación",
-    key: "fechaInst",
+    label: "Cercanía",
+    key: "geohash",
   },
 ];
 

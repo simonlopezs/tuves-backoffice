@@ -1,37 +1,21 @@
 import { LocationOnOutlined, QuestionMark } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
-import { LonLat } from "../../../services/location";
 
 interface StateIconProps {
-  location: LonLat;
+  distance: number | null;
   size?: "small" | "medium" | "large";
 }
-type State = "very close" | "near" | "away" | "far away" | "unknown";
+type Color = "success" | "primary" | "warning" | "error" | "info";
 
-const stateColors: Record<
-  State,
-  "success" | "primary" | "warning" | "error" | "info"
-> = {
-  "very close": "success",
-  near: "primary",
-  away: "warning",
-  "far away": "error",
-  unknown: "info",
+export const StateIcon = ({ distance, size = "medium" }: StateIconProps) => {
+  if (!distance) return <QuestionMark fontSize={size} />;
+  const stateColor = getStateColor(distance);
+
+  return <LocationOnOutlined color={stateColor} fontSize={size} />;
 };
 
-export const StateIcon = ({ location, size = "medium" }: StateIconProps) => {
-  if (!location)
-    return (
-      <IconButton size={size}>
-        <QuestionMark />
-      </IconButton>
-    );
-
-  const stateColor = stateColors["unknown"];
-
-  return (
-    <IconButton color={stateColor}>
-      <LocationOnOutlined fontSize={size} />
-    </IconButton>
-  );
+const getStateColor = (distance: number): Color => {
+  if (distance < 1) return "success";
+  if (distance < 5) return "primary";
+  if (distance < 30) return "warning";
+  return "error";
 };

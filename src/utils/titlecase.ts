@@ -1,12 +1,12 @@
 export function titlecase(str: string) {
-  if (typeof str !== "string") return "";
+  if (typeof str !== "string" || !str) return "";
   return str
     .trim()
     .split(" ")
     .map((word, i) => {
       return !articles.includes(word.toLowerCase()) || i === 0
-        ? word[0].toUpperCase() + word.slice(1).toLowerCase()
-        : word.toLowerCase();
+        ? (word[0]?.toUpperCase() || "") + (word.slice(1)?.toLowerCase() || "")
+        : word?.toLowerCase() || "";
     })
     .join(" ");
 }
