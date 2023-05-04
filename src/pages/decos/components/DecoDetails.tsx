@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
-import { Done, Phone, WhatsApp } from "@mui/icons-material";
+import { Done, MapOutlined, Phone, WhatsApp } from "@mui/icons-material";
 import { Deco } from "../../../classes/Deco";
 import { StateIcon } from "./StateIcon";
 import { locationService } from "../../../services/location";
@@ -16,6 +16,16 @@ export const DecoDetails = ({ deco, location }: DecoDetailsProps) => {
     location,
     deco.getLocation()
   );
+
+  const openMap = () => {
+    const origin = lngLatToString(location);
+    const destination = lngLatToString(deco.getLocation());
+    if (!destination || !origin) return;
+    const url = encodeURI(
+      `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelMode=driving`
+    );
+    window.open(url);
+  };
 
   return (
     <>
@@ -40,11 +50,21 @@ export const DecoDetails = ({ deco, location }: DecoDetailsProps) => {
               N° abonado: <b>{deco.getCode()}</b>
             </Typography>
             <Typography variant="body1">
-              Dirección: <b>{deco.getAddress()}</b>
-            </Typography>
-            <Typography variant="body1">
               Pagos hechos: <b>{deco.getPayments()}</b>
             </Typography>
+            <Typography variant="body1">
+              Dirección: <b>{deco.getAddress()}</b>
+            </Typography>
+            {deco.getLocation() && (
+              <Button
+                onClick={openMap}
+                color="primary"
+                variant="outlined"
+                startIcon={<MapOutlined />}
+              >
+                Ver mapa
+              </Button>
+            )}
           </Stack>
 
           <DecosList decos={deco.getDecos()} />
@@ -77,7 +97,6 @@ export const DecoDetails = ({ deco, location }: DecoDetailsProps) => {
             color="primary"
             variant="contained"
             startIcon={<Done />}
-            size="large"
           >
             Registrar retiro
           </Button>
@@ -86,3 +105,22 @@ export const DecoDetails = ({ deco, location }: DecoDetailsProps) => {
     </>
   );
 };
+
+// function isMobileDevice() {
+//   const toMatch = [
+//     /Android/i,
+//     /webOS/i,
+//     /iPhone/i,
+//     /iPad/i,
+//     /iPod/i,
+//     /BlackBerry/i,
+//     /Windows Phone/i,
+//   ];
+//   return toMatch.some((toMatchItem) => navigator.userAgent.match(toMatchItem));
+// }
+
+function lngLatToString(location?: LngLat | null) {
+  if (!location) return null;
+  const { lng, lat } = location;
+  return `${lat},${lng}`;
+}
