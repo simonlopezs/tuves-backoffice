@@ -19,7 +19,9 @@ export const CustomerDetails = ({ customer }: CustomerDetailProps) => {
             </Typography>
           </Box>
 
-          <StateIcon size="large" daysLate={customer.getDaysLate()} />
+          <Box display="flex" justifyContent="center">
+            <StateIcon size="large" daysLate={customer.getDaysLate()} />
+          </Box>
 
           <Stack spacing={1.5}>
             <Typography variant="body1">

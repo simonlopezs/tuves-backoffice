@@ -13,23 +13,11 @@ type State = "ok" | "warning" | "error";
 
 const states: Record<
   State,
-  {
-    icon: (size: "small" | "medium" | "large") => JSX.Element;
-    color: "success" | "warning" | "error";
-  }
+  (size: "small" | "medium" | "large") => JSX.Element
 > = {
-  ok: {
-    icon: (size) => <CheckCircleOutline fontSize={size} />,
-    color: "success",
-  },
-  warning: {
-    icon: (size) => <ErrorOutline fontSize={size} />,
-    color: "warning",
-  },
-  error: {
-    icon: (size) => <ErrorOutline fontSize={size} />,
-    color: "error",
-  },
+  ok: (size) => <CheckCircleOutline color="success" fontSize={size} />,
+  warning: (size) => <ErrorOutline color="warning" fontSize={size} />,
+  error: (size) => <ErrorOutline color="error" fontSize={size} />,
 };
 
 export const StateIcon = ({ daysLate, size = "large" }: StateIconProps) => {
@@ -37,7 +25,5 @@ export const StateIcon = ({ daysLate, size = "large" }: StateIconProps) => {
 
   const state: State =
     daysLate <= 0 ? "ok" : daysLate <= 30 ? "warning" : "error";
-  const stateData = states[state];
-  const icon = stateData.icon(size);
-  return icon;
+  return states[state](size);
 };

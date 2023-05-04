@@ -17,21 +17,24 @@ const tabs = [
 
 export const Decos = () => {
   const [location, setLocation] = useState<LngLat | null>(null);
-
-  useEffect(() => {
-    const id = navigator.geolocation.watchPosition(
+  const getLocation = () =>
+    navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
         setLocation({ lng, lat });
       },
-      (err) => console.error(`ERROR(${err.code}): ${err.message}`),
+      (err) => console.error(`ERROR(${err.code}):Infinity ${err.message}`),
       {
-        enableHighAccuracy: false,
-        timeout: 5000,
-        maximumAge: 0,
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5 * 60 * 1000,
       }
     );
-    return () => navigator.geolocation.clearWatch(id);
+
+  useEffect(() => {
+    getLocation();
+    const timer = setInterval(() => getLocation(), 10000);
+    return () => clearInterval(timer);
   }, []);
 
   return (

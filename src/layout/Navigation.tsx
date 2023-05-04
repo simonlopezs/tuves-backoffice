@@ -11,9 +11,7 @@ export const Navigation = () => {
 
   useEffect(() => {
     const realPath = location.pathname.split("/")[2];
-    if (realPath !== path) {
-      setPath(realPath);
-    }
+    setPath(realPath);
   }, [location]);
 
   const changeRoute = (_: any, path: string) => {

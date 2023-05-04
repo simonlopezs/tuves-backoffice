@@ -14,8 +14,8 @@ export const StateIcon = ({ distance, size = "medium" }: StateIconProps) => {
 };
 
 const getStateColor = (distance: number): Color => {
-  if (distance < 1) return "success";
-  if (distance < 5) return "primary";
+  if (distance < 2) return "success";
+  if (distance < 10) return "primary";
   if (distance < 30) return "warning";
   return "error";
 };

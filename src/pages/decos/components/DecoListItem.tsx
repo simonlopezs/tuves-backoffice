@@ -30,7 +30,7 @@ export const DecoListItem = ({ deco, style }: DecoListItemProps) => {
     [myLocation, location]
   );
   const selectDeco = (deco: Deco) =>
-    setDrawerContent(<DecoDetails deco={deco} />);
+    setDrawerContent(<DecoDetails deco={deco} location={myLocation} />);
 
   return (
     <ListItem

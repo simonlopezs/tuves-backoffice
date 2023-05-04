@@ -1,5 +1,10 @@
 import { useInfiniteQuery } from "react-query";
-import { Filter, QueryOptions, dbConnector } from "../../api/db-connector";
+import {
+  Filter,
+  QueryOptions,
+  ResponseData,
+  dbConnector,
+} from "../../api/db-connector";
 import { useState } from "react";
 import { flatten } from "lodash";
 import { InfiniteList } from "../../components/InfiniteList";
@@ -7,27 +12,35 @@ import { OverallSpinner } from "../../components/OverallSpinner";
 import { DecoListItem } from "./components/DecoListItem";
 import { IDeco } from "../../models/Deco.model";
 import { Deco } from "../../classes/Deco";
-import { Stack } from "@mui/material";
-import { SortMenu } from "./components/SortMenu";
+import { Fab, Stack } from "@mui/material";
 import { FilterMenu } from "./components/FilterMenu";
+import { Radar } from "@mui/icons-material";
+import { useDecosContext } from "./DecosContext";
 
 export const OptionalDecos = () => {
-  const [orderBy, setOrderBy] = useState("fchIngreso");
-  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const [filter, setFilter] = useState<Filter | null>(null);
+  const [orderBy, setOrderBy] = useState<"cantidadDecos" | "geohash">(
+    "cantidadDecos"
+  );
+  const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
+  const { location } = useDecosContext();
 
   const fetchDecos = async ({ pageParam: cursor = undefined }) => {
     const queryOptions: QueryOptions = {
-      orderBy: "cantidadDecos",
-      orderDirection: "desc",
+      orderBy,
+      orderDirection,
       cursor,
+      filters: filter ? [filter] : [],
     };
-    return dbConnector
-      .get<IDeco>("decos", queryOptions)
-      .then(({ data, nextCursor }) => ({
-        data: data.map((item) => new Deco(item)),
-        nextCursor,
-      }));
+    let promise: Promise<ResponseData<IDeco>>;
+    if (orderBy === "geohash")
+      promise = dbConnector.getByGeohash<IDeco>("decos", cursor, location);
+    else promise = dbConnector.get<IDeco>("decos", queryOptions);
+
+    return promise.then(({ data, nextCursor }) => ({
+      data: data.map((item) => new Deco(item)),
+      nextCursor,
+    }));
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -40,6 +53,10 @@ export const OptionalDecos = () => {
         staleTime: 1000 * 60 * 60 * 24,
       }
     );
+  const toggleGeoFilter = () => {
+    if (filter) setFilter(null);
+    setOrderBy(orderBy === "geohash" ? "cantidadDecos" : "geohash");
+  };
 
   const decos = flatten(data?.pages.map(({ data }) => data) || []);
 
@@ -52,11 +69,23 @@ export const OptionalDecos = () => {
         items={decos}
         loadNextPage={fetchNextPage}
         itemSize={92.03}
+        showMore={orderBy !== "geohash"}
       >
         {({ item, style }) => <DecoListItem style={style} deco={item} />}
       </InfiniteList>
       <Stack spacing={2} sx={{ position: "fixed", bottom: 55 + 16, right: 16 }}>
-        <FilterMenu {...{ filter, setFilter }} />
+        <Fab
+          color={orderBy === "geohash" ? "primary" : "default"}
+          disabled={!location}
+          onClick={toggleGeoFilter}
+          size="medium"
+        >
+          <Radar />
+        </Fab>
+        <FilterMenu
+          disabled={orderBy === "geohash"}
+          {...{ filter, setFilter }}
+        />
       </Stack>
     </>
   );

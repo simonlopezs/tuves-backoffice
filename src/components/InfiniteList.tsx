@@ -11,6 +11,7 @@ interface InfiniteListProps {
   children: (props: any) => JSX.Element;
   itemSize: number;
   subHeight?: number;
+  showMore?: boolean;
 }
 
 export const InfiniteList = ({
@@ -20,6 +21,7 @@ export const InfiniteList = ({
   loadNextPage,
   itemSize,
   subHeight = 0,
+  showMore = true,
 }: InfiniteListProps) => {
   return (
     <AutoSizer>
@@ -40,9 +42,11 @@ export const InfiniteList = ({
                 {isNextPageLoading ? (
                   <CircularProgress></CircularProgress>
                 ) : (
-                  <Button size="large" onClick={loadNextPage}>
-                    Mostrar más
-                  </Button>
+                  showMore && (
+                    <Button size="large" onClick={loadNextPage}>
+                      Mostrar más
+                    </Button>
+                  )
                 )}
               </Stack>
             )

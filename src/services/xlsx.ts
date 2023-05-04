@@ -60,7 +60,7 @@ class XLSXService {
     fileName = fileName.toLowerCase();
     const type = fileName.includes("cartera")
       ? "customers"
-      : ["kpi", "base"].some((v) => fileName.includes(v))
+      : ["base"].some((v) => fileName.includes(v))
       ? "decos"
       : null;
     if (!type) throw new Error("Archivo no reconocido");

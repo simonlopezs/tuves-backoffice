@@ -18,13 +18,23 @@ import {
   setDoc,
   addDoc,
   or,
-  QueryConstraint,
+  startAt,
+  endAt,
 } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 import { FirebaseApp } from "firebase/app";
 import { SessionHandler } from "./session-handler";
-import { chunk, compact, flatten, last, mapValues } from "lodash";
+import {
+  chunk,
+  compact,
+  flatten,
+  last,
+  mapValues,
+  orderBy as _orderBy,
+} from "lodash";
 import { IUser } from "../models";
+import { LngLat } from "../models/LngLat.model";
+import * as Geofire from "geofire-common";
 
 export type Collection = "users" | "customers" | "decos";
 
@@ -51,6 +61,11 @@ const defaultQueryOptions: QueryOptions = {
   filterMode: "and",
 };
 
+const DEFAULT_LIMIT = 10;
+const DEFAULT_RADIUS_IN_KM = 10;
+
+export type ResponseData<T> = { data: T[]; nextCursor: DocumentCursor };
+
 export type DocumentCursor = QueryDocumentSnapshot<DocumentData> | undefined;
 
 export class DbConnector {
@@ -68,7 +83,7 @@ export class DbConnector {
   async get<T>(
     collectionName: Collection,
     queryOptions?: QueryOptions
-  ): Promise<{ data: T[]; nextCursor: DocumentCursor }> {
+  ): Promise<ResponseData<T>> {
     const {
       orderBy: _orderBy,
       limit: _limit,
@@ -87,7 +102,7 @@ export class DbConnector {
       filterMode === "or" ? or(...filters) : filters,
       orderBy(_orderBy || "createdAt", orderDirection || "desc"),
       cursor ? startAfter(cursor) : undefined,
-      limit(_limit || 10),
+      limit(_limit || DEFAULT_LIMIT),
     ]);
     return getDocs(
       query(
@@ -101,6 +116,52 @@ export class DbConnector {
       );
       return { data, nextCursor };
     });
+  }
+  async getByGeohash<T>(
+    collectionName: Collection,
+    cursor: DocumentCursor,
+    center: LngLat | null
+  ): Promise<ResponseData<T>> {
+    if (!center) return { data: [], nextCursor: cursor };
+    const { lat, lng } = center;
+    const radiusInM = DEFAULT_RADIUS_IN_KM * 1000;
+    const bounds = Geofire.geohashQueryBounds([lat, lng], radiusInM);
+    return Promise.all(
+      bounds.map((b) =>
+        getDocs(
+          query(
+            collection(this.db, `${this.basePath}/${collectionName}`),
+            orderBy("geohash"),
+            startAt(b[0]),
+            endAt(b[1])
+          )
+        )
+      )
+    )
+      .then((snapshots) => flatten(snapshots.map((s) => s.docs)))
+      .then((docs) => {
+        const matchingDocs: { doc: QueryDocumentSnapshot; distance: number }[] =
+          [];
+        docs.forEach((doc) => {
+          const _lng = doc.get("lng");
+          const _lat = doc.get("lat");
+          const distanceInKm = Geofire.distanceBetween(
+            [_lat, _lng],
+            [lat, lng]
+          );
+          const distanceInM = distanceInKm * 1000;
+          if (distanceInM <= radiusInM) {
+            matchingDocs.push({ doc, distance: distanceInM });
+          }
+        });
+
+        const data = _orderBy(matchingDocs, ["distance", "asc"])
+          .map((d) => d.doc)
+          .map(
+            (doc) => ({ ...this.formatDates(doc.data()), _id: doc.id } as T)
+          );
+        return { data, nextCursor: undefined };
+      });
   }
 
   private formatDates(obj: Object) {
@@ -146,33 +207,6 @@ export class DbConnector {
       ? setDoc(doc(...baseArgs, id), data)
       : addDoc(collection(...baseArgs), data);
   }
-
-  // async update<T extends AppModel>() {
-  //     return Promise.resolve()
-  // }
-
-  // async delete(collection: Collection, id: string) {
-  //     return this.databases.deleteDocument(
-  //         this.databaseId,
-  //         this.getCollectionId(collection), id)
-  // }
-
-  // async searchByTerm<T extends AppModel>(collection: Collection, keys: string[], term: string) {
-  //     return Promise.all(keys.map(async (key) => {
-  //         return this.databases.listDocuments<T>(
-  //             this.databaseId,
-  //             this.getCollectionId(collection),
-  //             [
-  //                 Query.search(key, String(term)),
-  //                 Query.limit(10)
-  //             ]
-  //         ).then((response) => response.documents)
-  //     })).then((responses) => uniqBy(flatten(responses), '$id'))
-  // }
-
-  // private getCollectionId(collection: Collection) {
-  //     return this.config.collectionsIds[collection]
-  // }
 }
 
 const dbConnector = new DbConnector(firebaseApp);

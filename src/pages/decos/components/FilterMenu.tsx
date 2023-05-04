@@ -33,6 +33,7 @@ const options = [
 interface FilterMenuProps {
   filter: Filter | null;
   setFilter: (filter: Filter | null) => void;
+  disabled?: boolean;
 }
 
 const getCommunes = () =>
@@ -40,7 +41,11 @@ const getCommunes = () =>
     .getOne<MetaCommunes>("meta", "communes")
     .then((doc) => (doc ? doc.data : []));
 
-export const FilterMenu = ({ filter, setFilter }: FilterMenuProps) => {
+export const FilterMenu = ({
+  filter,
+  setFilter,
+  disabled = false,
+}: FilterMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [filterKey, setFilterKey] = useState(filter?.key || "comuna");
   const [filterValue, setFilterValue] = useState(filter?.value || "coquimbo");
@@ -91,6 +96,7 @@ export const FilterMenu = ({ filter, setFilter }: FilterMenuProps) => {
         aria-expanded={open ? "true" : undefined}
         size="medium"
         color={filter ? "primary" : "default"}
+        disabled={disabled}
       >
         <FilterAltOutlined />
       </Fab>

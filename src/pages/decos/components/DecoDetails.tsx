@@ -1,12 +1,22 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import { Phone, WhatsApp } from "@mui/icons-material";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { Done, Phone, WhatsApp } from "@mui/icons-material";
 import { Deco } from "../../../classes/Deco";
+import { StateIcon } from "./StateIcon";
+import { locationService } from "../../../services/location";
+import { LngLat } from "../../../models/LngLat.model";
+import { DecosList } from "./DecosList";
 
 interface DecoDetailsProps {
   deco: Deco;
+  location: LngLat | null;
 }
 
-export const DecoDetails = ({ deco }: DecoDetailsProps) => {
+export const DecoDetails = ({ deco, location }: DecoDetailsProps) => {
+  const distance = locationService.calculateDistance(
+    location,
+    deco.getLocation()
+  );
+
   return (
     <>
       {deco && (
@@ -18,9 +28,14 @@ export const DecoDetails = ({ deco }: DecoDetailsProps) => {
             </Typography>
           </Box>
 
-          {/* <StateIcon size="large" daysLate={deco.getDaysLate()} /> */}
+          <Box display="flex" justifyContent="center">
+            <StateIcon size="large" distance={distance} />
+          </Box>
 
           <Stack spacing={1.5}>
+            <Typography variant="body1">
+              Distancia: <b>{distance ? distance + " km" : "desconocida"}</b>
+            </Typography>
             <Typography variant="body1">
               N° abonado: <b>{deco.getCode()}</b>
             </Typography>
@@ -28,21 +43,12 @@ export const DecoDetails = ({ deco }: DecoDetailsProps) => {
               Dirección: <b>{deco.getAddress()}</b>
             </Typography>
             <Typography variant="body1">
-              Fecha de instalación:{" "}
-              {/* <b>{deco.getDate("instalacion") as string}</b> */}
-            </Typography>
-            <Typography variant="body1">
-              Fecha fin recarga:{" "}
-              {/* <b>{deco.getDate("finRecarga") as string}</b> */}
-            </Typography>
-            <Typography variant="body1">
               Pagos hechos: <b>{deco.getPayments()}</b>
             </Typography>
-            <Typography variant="body1">
-              De baja:{" "}
-              {/* <b>{deco.getDaysToLimitDate() || "sin información"}</b> */}
-            </Typography>
           </Stack>
+
+          <DecosList decos={deco.getDecos()} />
+
           <Stack marginTop={2} spacing={2}>
             {deco.getPhones().map((phone, i) => (
               <Stack key={i} spacing={1} marginBottom={1}>
@@ -65,6 +71,16 @@ export const DecoDetails = ({ deco }: DecoDetailsProps) => {
               </Stack>
             ))}
           </Stack>
+          <Divider />
+          <Button
+            disabled={true}
+            color="primary"
+            variant="contained"
+            startIcon={<Done />}
+            size="large"
+          >
+            Registrar retiro
+          </Button>
         </Stack>
       )}
     </>
